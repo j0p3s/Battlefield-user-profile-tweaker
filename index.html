@@ -299,7 +299,7 @@
   <header class="top">
     <h1>Tuned Battlefield configs for your PC</h1>
     <p>Pick your hardware and get a <code>user.cfg</code> and <code>PROFSAVE_profile</code> built for it, with every setting explained. Everything runs in your browser. Nothing is uploaded.</p>
-    <p class="script-link" id="scriptLine">On Windows and want automatic detection? <a id="scriptLink" href="https://github.com/j0p3s/Battlefield-user-profile-tweaker/releases/latest">Download the Battlefield Optimizer script</a> for all four games, with backups and Undo.</p>
+    <p class="script-link" id="scriptLine">On Windows and want automatic detection? <a id="scriptLink" href="https://github.com/j0p3s/Battlefield-user-profile-tweaker/releases/latest">Download the Battlefield Optimizer script</a> for all four games, with backups and Undo, or the <a id="guiLink" href="https://github.com/j0p3s/Battlefield-user-profile-tweaker/releases/latest">window version (GUI)</a> to choose exactly which tweaks are applied.</p>
   </header>
 
   <div class="grid">
@@ -504,9 +504,19 @@
     <div id="driver"></div>
   </section>
 
+  <section class="lower driver" aria-labelledby="winH">
+    <h2 id="winH">On Windows? Two apps, no install</h2>
+    <p>Both are single, readable <code>.cmd</code> files that detect your hardware for you, copy the files into the game with a backup, and can undo it. Download them from the <a id="winRelease" href="#">latest release</a>.</p>
+    <ul>
+      <li><strong>Battlefield_Optimizer.cmd</strong>: a guided run in the console for all four games. Pick the game, confirm G-Sync / FreeSync, and it does the rest.</li>
+      <li><strong>Battlefield_Optimizer_GUI.cmd</strong>: the same engine in a window. Choose the graphics tier, the FPS cap and every tweak (motion blur, lens effects, depth of field, visibility, V-Sync, frame generation, DirectX 11 and more) with checkboxes, preview the changes, then apply or undo. Keep it in the same folder as the script.</li>
+    </ul>
+    <p class="hint">The script and the GUI give the same results for the same choices. See the <a id="changelogLink" href="#">changelog</a> for what's new.</p>
+  </section>
+
   <footer>
     <button type="button" class="theme-toggle" id="theme">Switch theme</button>
-    <p>Open source. Settings and sources are on <a id="repoLink" href="#">GitHub</a>, where you can report a missing CPU or GPU.</p>
+    <p>Open source (MIT). Settings and sources are on <a id="repoLink" href="#">GitHub</a>, where you can report a missing CPU or GPU.</p>
     <p>Not affiliated with, endorsed by or connected to Electronic Arts or DICE. Battlefield is a trademark of Electronic Arts Inc. Use at your own risk and keep backups of your settings.</p>
   </footer>
 </div>
@@ -1439,6 +1449,9 @@ readHash();
 initTabs(); initTheme();
 $("repoLink").href = REPO_URL;
 $("scriptLink").href = SCRIPT_URL;
+$("guiLink").href = SCRIPT_URL;
+$("winRelease").href = SCRIPT_URL;
+$("changelogLink").href = REPO_URL + "/blob/main/CHANGELOG.md";
 
 // Picking a laptop CPU or GPU switches PC type to Laptop (still editable)
 $("cpu").addEventListener("change", () => {

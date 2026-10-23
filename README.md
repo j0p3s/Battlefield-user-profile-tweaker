@@ -2,20 +2,23 @@
 
 Tuned `user.cfg` and `PROFSAVE_profile` files for **Battlefield 4, Battlefield 1, Battlefield V and Battlefield 6**, matched to your hardware, with every setting explained.
 
-There are two ways to use it. Both are free and open source.
+There are three ways to use it. All are free and open source.
 
-| | 🌐 **Web page** | 💻 **Windows script** |
-|---|---|---|
-| Link | **[Open the Config Builder](https://j0p3s.github.io/Battlefield-user-profile-tweaker/)** | [Download `Battlefield_Optimizer.cmd`](../../releases/latest) |
-| Install or download anything? | **No.** It runs in your browser | One `.cmd` file, no installer |
-| Hardware | You pick CPU, GPU, RAM and display from lists | Detected automatically |
-| G-Sync / FreeSync | You choose | Read from your monitor, then you confirm |
-| Your keybinds, FOV, audio | Kept if you load your current `PROFSAVE_profile` | Kept automatically |
-| Copies files into the game | You copy them yourself | Optional, with backups |
-| Undo | Keep your own backup | Built in |
-| Works on | Any device with a browser | Windows 10 / 11 |
+| | 🌐 **Web page** | 💻 **Windows script** | 🖱️ **Windows GUI** |
+|---|---|---|---|
+| Link | **[Open the Config Builder](https://j0p3s.github.io/Battlefield-user-profile-tweaker/)** | [Download `Battlefield_Optimizer.cmd`](../../releases/latest) | [Download `Battlefield_Optimizer_GUI.cmd`](../../releases/latest) (keep it next to the script) |
+| Install or download anything? | **No.** It runs in your browser | One `.cmd` file, no installer | Two `.cmd` files, no installer |
+| Hardware | You pick CPU, GPU, RAM and display from lists | Detected automatically | Detected automatically |
+| You choose | Hardware, game, extras | Game and the G-Sync / FreeSync answer | **Every tweak**, graphics tier, FPS cap, `user.cfg` lines |
+| G-Sync / FreeSync | You choose | Read from your monitor, then you confirm | Read from your monitor, then you tick the box |
+| Your keybinds, FOV, audio | Kept if you load your current `PROFSAVE_profile` | Kept automatically | Kept automatically |
+| Copies files into the game | You copy them yourself | Optional, with backups | Optional, with backups |
+| Undo | Keep your own backup | Built in | Built in (button) |
+| Works on | Any device with a browser | Windows 10 / 11 | Windows 10 / 11 |
 
 **Don't want to install or run anything on your PC?** Use the **[web page](https://j0p3s.github.io/Battlefield-user-profile-tweaker/)**. It works on any computer or phone. Everything happens in your browser and nothing is uploaded.
+
+**Want full control on Windows?** Use the **[GUI](#option-3-windows-gui)** and pick exactly which tweaks are applied. The script and the GUI share the same engine, so they always produce the same results for the same choices. See the [changelog](CHANGELOG.md) for what's new.
 
 ---
 
@@ -27,6 +30,7 @@ There are two ways to use it. Both are free and open source.
   - [Quick start](#quick-start)
   - [What happens when you run it](#what-happens-when-you-run-it)
   - [Output folders](#output-folders)
+- [Option 3: Windows GUI](#option-3-windows-gui)
 - [Where to put the files](#where-to-put-the-files)
 - [How settings are chosen](#how-settings-are-chosen)
 - [Recommended driver settings](#recommended-driver-settings)
@@ -77,7 +81,7 @@ No executables, no DLLs, no game files modified. It's a single, fully commented 
 
 ### Quick start
 
-1. Download **`Battlefield_Optimizer.cmd`** from the [latest release](../../releases/latest).
+1. Download **`Battlefield_Optimizer.cmd`** from the [latest release](../../releases/latest). (Also download `Battlefield_Optimizer_GUI.cmd` if you want the [window version](#option-3-windows-gui).)
 2. Launch the game **once**, reach the main menu, then close it. This creates your `PROFSAVE_profile`.
 3. Double-click `Battlefield_Optimizer.cmd`.
 4. Pick the game from the menu.
@@ -90,15 +94,18 @@ No executables, no DLLs, no game files modified. It's a single, fully commented 
 1. **Menu.** Every game is listed, showing whether it's installed and whether its settings file was found:
 
    ```
-   === Battlefield Optimizer v2.0.0 ===
+   === Battlefield Optimizer v2.1.0 ===
    Which game do you want to optimize?
 
      1) Battlefield 4   [installed, settings found]
      2) Battlefield 1   [not detected]
      3) Battlefield V   [installed]
      4) Battlefield 6   [installed, settings found]
-     0) Exit
+     G) Graphical interface (choose every tweak in a window)
+   0) Exit
    ```
+
+   The `G` line only appears when `Battlefield_Optimizer_GUI.cmd` is in the same folder.
 
 2. **Undo option.** If backups from an earlier run exist, you can choose to **generate** new settings or **undo** the last apply.
 3. **Hardware scan:** CPU, RAM, GPU and VRAM, laptop or desktop, and the EDID of every monitor. This happens once per session.
@@ -116,7 +123,7 @@ No executables, no DLLs, no game files modified. It's a single, fully commented 
 #### Example output (Battlefield 4)
 
 ```
-=== Battlefield Optimizer v2.0.0 - Battlefield 4 (user.cfg + PROFSAVE_profile) ===
+=== Battlefield Optimizer v2.1.0 - Battlefield 4 (user.cfg + PROFSAVE_profile) ===
 
 --- Hardware ---
 CPU      : Intel(R) Core(TM) i7-8700K CPU @ 3.70GHz  (6 cores / 12 threads)
@@ -149,6 +156,7 @@ Each game gets its own folder next to the script:
 
 ```
 Battlefield_Optimizer.cmd
+Battlefield_Optimizer_GUI.cmd   <- optional
 BF4_Optimized\
 ├── user.cfg            <- goes into the game folder
 ├── PROFSAVE_profile    <- goes into Documents\Battlefield 4\settings
@@ -162,9 +170,61 @@ BF6_Optimized\
 
 ---
 
+## Option 3: Windows GUI
+
+**`Battlefield_Optimizer_GUI.cmd`** is the same optimizer in a window. Instead of answering prompts, you tick what you want and see the resulting FPS cap and settings before anything is written.
+
+It needs **no install**: like the script, it is one plain-text `.cmd` file that uses Windows PowerShell 5.1 (WinForms), which comes with Windows. Open it in a text editor to read it first.
+
+### Quick start
+
+1. Download **both** `Battlefield_Optimizer.cmd` and `Battlefield_Optimizer_GUI.cmd` from the [latest release](../../releases/latest) and keep them in the **same folder**.
+2. Launch the game **once**, reach the main menu, then close it. This creates your `PROFSAVE_profile`.
+3. Double-click `Battlefield_Optimizer_GUI.cmd`. (From the script's menu you can also type `G`.)
+4. Choose the options below, then click a button.
+
+> The GUI loads the detection and tuning code from `Battlefield_Optimizer.cmd` when it starts, so a fix or a new GPU rule in the script automatically applies to the GUI too. If the script isn't next to it, the GUI asks you to select it.
+
+### What you can choose
+
+| Section | Options |
+|---|---|
+| **1. Game** | Battlefield 4, 1, V or 6, with install and settings status |
+| **Detected hardware** | CPU, RAM, GPU and VRAM, laptop or desktop, monitor and VRR hints (read-only) |
+| **2. Graphics** | Generate `PROFSAVE_profile` on or off. Tier: **Auto** (from your GPU) or force Low / Medium / High. Tick or untick each tweak group (see below) |
+| **3. Display and FPS cap** | G-Sync / FreeSync enabled, refresh rate, FPS cap **Auto**, **Custom value** or **No limit**. The result and the reason are shown live |
+| **4. user.cfg** | BF4 / BF1 / BF V: FPS counter, render queue, triple buffering / V-Sync / motion blur off. BF6: CPU thread settings |
+
+**Tweak groups you can switch on or off:**
+
+- Motion blur off
+- Lens effects off (chromatic aberration, film grain, lens distortion, vignette)
+- Depth of field off (weapon and scope blur)
+- Visibility: less grass, bloom / haze and volumetric fog
+- Costly effects off (ambient occlusion, reflections, global illumination, deferred MSAA)
+- In-game V-Sync off
+- BF6 only: frame generation off, low-latency modes on
+- BF1 only: force DirectX 11
+- Graphics preset from the GPU tier (textures, meshes, terrain, shadows, effects, anti-aliasing...)
+
+A group you untick is left **exactly as it is** in your current profile. If you untick everything, no profile is generated.
+
+### Buttons
+
+| Button | What it does |
+|---|---|
+| **Generate files (preview only)** | Writes `user.cfg`, `PROFSAVE_profile` and `README.txt` to the `<game>_Optimized` folder and shows every change in the log. Nothing in the game is touched |
+| **Generate and apply to the game (with backup)** | Does the same, then asks for confirmation, waits until the game is closed, backs up your current files and copies the new ones. Windows asks for admin rights only if the game folder needs them |
+| **Undo last apply (restore backups)** | Restores the newest backup of `PROFSAVE_profile` and `user.cfg`. Each click goes one step further back |
+| **Open output folder** | Opens the `<game>_Optimized` folder in File Explorer |
+
+The backups use the same `.bak_YYYYMMDD_HHMMSS` files as the script, so you can apply with one and undo with the other.
+
+---
+
 ## Where to put the files
 
-This applies to both the web page and the script.
+This applies to the web page, the script and the GUI.
 
 | File | Goes to | Notes |
 |---|---|---|
@@ -354,7 +414,7 @@ With variable refresh, V-Sync goes **on in the driver** and stays **off in the g
 
 ## How hardware detection works
 
-This applies to the script only. On the web page, you pick your hardware yourself.
+This applies to the script and the GUI (they share the same code). On the web page, you pick your hardware yourself.
 
 | What | Source |
 |---|---|
@@ -388,6 +448,7 @@ The script also warns you if Windows runs your monitor below its maximum refresh
 - It only touches the games' own plain-text config files. No DLLs, no injection, no game files modified, no registry changes.
 - Admin rights are requested only to copy `user.cfg` into a protected game folder, and only for that one copy.
 - `ExecutionPolicy Bypass` applies to this one PowerShell process only. Your system policy isn't changed.
+- **The GUI** only reads the script next to it to reuse its code. It has the same backup and Undo behavior, and nothing is changed until you click **Generate and apply** and confirm.
 - **The web page** never uploads anything: your profile is read and edited in your browser.
 
 **Restoring by hand:** close the game, delete the new file, and rename the newest `.bak_` file back to `PROFSAVE_profile` or `user.cfg`. Alternatively, in-game, choose a graphics preset and apply it; the game rewrites the profile with its own values.
@@ -396,9 +457,13 @@ The script also warns you if Windows runs your monitor below its maximum refresh
 
 ## FAQ
 
-**Should I use the web page or the script?**
+**Should I use the web page, the script or the GUI?**
 - **Web page:** if you don't want to run anything on your PC, you're on another device, or you just want to see the values first.
-- **Script:** if you want automatic detection, one-click install and Undo.
+- **Script:** if you want automatic detection, a quick guided run, and one-key install and Undo.
+- **GUI:** if you want the same automatic detection but with control over every tweak, the graphics tier and the FPS cap.
+
+**Do the script and the GUI give different results?**
+No. The GUI loads the script's own code, so with the default choices (tier Auto, FPS cap Auto, every box ticked) both produce the same files.
 
 **Can I get banned for this?**
 `user.cfg` and `PROFSAVE_profile` are the games' own configuration files, used by the community for years. Neither option modifies game files, injects code or touches memory. Still, use them at your own risk; see the [Disclaimer](#disclaimer).
@@ -437,6 +502,10 @@ The script asks for the refresh rate of the monitor you play on. On the web page
 | Windows shows 60 Hz on a high refresh monitor | Settings > System > Display > Advanced display > pick the highest refresh rate, then run the script again. |
 | "Permission declined" when copying `user.cfg` | Accept the Windows admin prompt, or copy the file by hand from the `<game>_Optimized` folder. |
 | Settings reverted after playing | You probably changed video options in-game. Run the script again. |
+| The GUI says the engine section was not found, or asks for a file | Keep `Battlefield_Optimizer.cmd` (v2.0.0 or newer) in the same folder as the GUI, or select it when asked. The file must not be renamed to something that doesn't start with `Battlefield_Optimizer`. |
+| The GUI doesn't open and nothing happens | Make sure the file still ends in `.cmd`, not `.cmd.txt`, and unblock it as described above. If a message box appears, please include its text in an issue. |
+| The `G` option is missing from the script's menu | `Battlefield_Optimizer_GUI.cmd` must be in the same folder as the script. |
+| The GUI says "There is nothing to apply" | Every option is unticked, or no settings file was found. Tick at least one option and, for BF V / BF6, start the game once first. |
 | Web page: download button for BF V or BF6 is greyed out | Load your current `PROFSAVE_profile` for that game in step 6 first. |
 
 ---
@@ -447,7 +516,8 @@ The script asks for the refresh rate of the monitor you play on. On the web page
 - **The GPU and CPU lists are hand-made.** New or rare models fall back to VRAM size or manual input until they're added.
 - **The presets are competitive-oriented:** visibility and FPS come first, visuals second.
 - **Some values are undocumented by the games**, such as anti-aliasing levels in BF1. Check the in-game options after applying.
-- **The script is Windows only.** The web page works anywhere.
+- **The script and the GUI are Windows only.** The web page works anywhere.
+- **The GUI needs the script next to it.** It doesn't carry its own copy of the tuning rules.
 - It has been tested on a limited number of systems, so feedback is very welcome.
 
 ---
@@ -461,21 +531,25 @@ Issues and pull requests are welcome! These are especially useful:
 - **Before / after results** on your hardware: FPS, 1% lows, temperatures.
 
 **Editing the script:**
-- Keep `.cmd` files with **CRLF** line endings; the repository's `.gitattributes` enforces this. Keep the file ASCII-only.
+- Keep `.cmd` files with **CRLF** line endings; the repository's `.gitattributes` enforces this. Keep the files ASCII-only.
 - Per-game data (folders, Steam IDs, process names) is in the `$Games` table at the top.
 - GPU tiers are in `Get-GpuTierClassic` and `Get-GpuTierBf6`. Rules are checked top to bottom and the first match wins, so put exceptions above broader patterns.
 - Graphics values are in `Get-ProfileSettingsBf4`, `...Bf1`, `...Bfv` and `...Bf6`.
+
+**Editing the GUI:** `Battlefield_Optimizer_GUI.cmd` extracts everything from the `$Games = [ordered]@{` line down to the `#  OPTIMIZER RUN (one game)` heading of the script, so keep those two markers in place when you edit the script. The tweak groups are the `$Cats` table at the top of the GUI; each profile key belongs to the first group whose pattern matches it.
 
 **Editing the web page:** `index.html` is a single self-contained file. The CPU and GPU lists are at the top of its script.
 
 **Repository layout:**
 
 ```
-Battlefield_Optimizer.cmd   # Windows script (batch launcher + PowerShell)
-index.html                  # web page (GitHub Pages)
-README.md                   # this file
-LICENSE                     # MIT license
-.gitattributes              # keeps CRLF line endings for .cmd files
+Battlefield_Optimizer.cmd       # Windows script and shared engine (batch launcher + PowerShell)
+Battlefield_Optimizer_GUI.cmd   # Windows GUI (uses the script's engine; keep both in one folder)
+index.html                      # web page (GitHub Pages)
+README.md                       # this file
+CHANGELOG.md                    # version history
+LICENSE                         # MIT license
+.gitattributes                  # keeps CRLF line endings for .cmd files
 ```
 
 ---
@@ -484,7 +558,7 @@ LICENSE                     # MIT license
 
 This project is not affiliated with, endorsed by or connected to Electronic Arts or DICE. Battlefield is a trademark of Electronic Arts Inc.
 
-The script and the web page are provided "as is", without warranty of any kind. Always keep backups of your settings. Use at your own risk.
+The script, the GUI and the web page are provided "as is", without warranty of any kind. Always keep backups of your settings. Use at your own risk.
 
 ---
 

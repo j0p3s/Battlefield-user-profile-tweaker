@@ -34,9 +34,13 @@ exit /b
 #  Each game keeps its own tuning rules (GPU tiers, graphics values, FPS cap
 #  and user.cfg contents); only the shared plumbing is common.
 #  Nothing on the system is modified unless you answer "Y" at the end.
+#
+#  Prefer a window with checkboxes? Keep Battlefield_Optimizer_GUI.cmd in the
+#  same folder and choose "G" in the menu (or double-click the GUI file). The
+#  GUI loads this script's detection and tuning code, so both always agree.
 # =============================================================================
 
-$AppVersion = '2.0.0'
+$AppVersion = '2.1.0'
 
 # Latin-1 maps every byte to one character and back, so files read and
 # written with it keep any non-ASCII byte exactly as it was.
@@ -1433,7 +1437,7 @@ function Invoke-Optimizer($g, [string]$scriptDir) {
 # -----------------------------------------------------------------------------
 # Show-Menu
 # Lists the games with what was found on this PC and returns the choice
-# ('1'-'4'), or $null to exit.
+# ('1'-'4', or 'G' to open the graphical interface), or $null to exit.
 # -----------------------------------------------------------------------------
 function Show-Menu([string]$scriptDir) {
     Write-Host ''
@@ -1451,13 +1455,17 @@ function Show-Menu([string]$scriptDir) {
         $color = if ($status -eq 'not detected') { 'DarkGray' } else { 'Gray' }
         Write-Host ("  {0}) {1,-15} [{2}]" -f $key, $g.Name, $status) -ForegroundColor $color
     }
+    $guiPath = Join-Path $scriptDir 'Battlefield_Optimizer_GUI.cmd'
+    $hasGui  = Test-Path -LiteralPath $guiPath -PathType Leaf
+    if ($hasGui) { Write-Host '  G) Graphical interface (choose every tweak in a window)' }
     Write-Host '  0) Exit'
     Write-Host ''
     while ($true) {
-        $c = "$(Read-Host 'Choose [1-4, 0 = exit]')".Trim()
+        $c = "$(Read-Host $(if ($hasGui) { 'Choose [1-4, G = window, 0 = exit]' } else { 'Choose [1-4, 0 = exit]' }))".Trim()
         if ($c -eq '0' -or $c -eq '') { return $null }
         if ($Games.Contains($c)) { return $c }
-        Write-Host 'Please type 1, 2, 3, 4 or 0.' -ForegroundColor Yellow
+        if ($hasGui -and $c -eq 'g') { return 'G' }
+        Write-Host $(if ($hasGui) { 'Please type 1, 2, 3, 4, G or 0.' } else { 'Please type 1, 2, 3, 4 or 0.' }) -ForegroundColor Yellow
     }
 }
 
@@ -1472,6 +1480,11 @@ function Main {
     while ($true) {
         $choice = Show-Menu $scriptDir
         if (-not $choice) { return }
+        if ($choice -eq 'G') {
+            # The GUI is a separate launcher in the same folder; it opens its own window
+            Start-Process -FilePath (Join-Path $scriptDir 'Battlefield_Optimizer_GUI.cmd') -WorkingDirectory $scriptDir
+            return
+        }
         try {
             Invoke-Optimizer $Games[$choice] $scriptDir
         } catch {
