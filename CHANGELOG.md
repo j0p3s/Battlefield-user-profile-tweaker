@@ -2,6 +2,27 @@
 
 All notable changes to this project are listed here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.2.0] - 2026-10-24
+
+### Added
+- **GUI remembers your choices** between runs (game, tier, tweak groups, FPS cap and user.cfg options), saved in `%APPDATA%\Battlefield Optimizer\gui-settings.json`. New **Reset choices** button.
+- **GUI tweak groups** now show how many settings each one holds for the selected game and tier; hovering lists them, and groups the game doesn't have (for example lens effects in BF4) are greyed out.
+- **GUI report** now includes what the script already printed: RAM and refresh-rate warnings, in-game refresh-rate warning, DirectX 12 / DXR and DLSS hints, the graphics-driver settings, and the GUI and script versions. It is shown from the top, and saved to `README.txt`.
+- **GUI Undo** shows the date of each backup (or that the file will be removed) before restoring.
+- **BF6 experimental extras (optional, off by default)** in the script and the GUI: `PerfOverlay.DrawFps 1` and `Thread.MaxWorkerThreadCount <threads>`. No public source confirms them for BF6, so they are never part of the default output.
+- Link to the project page in the GUI.
+
+### Fixed
+- **Outdated profile.** The games rewrite `PROFSAVE_profile` when they exit, so a file generated while the game was open could overwrite changes made in that session. The GUI now waits for the game to close before generating; the script asks you to close it first (type `C` to continue anyway, and it then rebuilds the profile from the game's saved copy before applying).
+- **Laptops with two GPUs:** the dedicated GPU (NVIDIA, Radeon RX / Pro, Arc A / B) is now preferred over an integrated Radeon or Intel GPU, even when the integrated one reports more memory.
+- **GUI engine choice:** when several `Battlefield_Optimizer*.cmd` files are in the folder, the one with the highest version is used (before, the name that sorted last won, which could be an old versioned file). A script older than the GUI is refused with a clear message.
+- **GUI "No limit"** for BF4, BF1 and BF V wrote `GameTime.MaxVariableFps 0`, whose meaning is not documented. It now writes `999`.
+
+### Changed
+- Driver advice, hardware warnings and the BF6 extras live in the script and are shared with the GUI, so both print the same text.
+- Laptop RTX 5060 is treated like the 4060 laptop in the Battlefield 6 GPU tiers (Medium).
+- Script and GUI version numbers are now 2.2.0. The GUI needs script 2.2.0 or newer.
+
 ## [2.1.0] - 2026-10-23
 
 ### Added
@@ -35,5 +56,6 @@ All notable changes to this project are listed here, newest first. The format fo
 - Monitor EDID reading for the refresh range and G-Sync / FreeSync hints, confirmed by the user.
 - Web page (Config Builder) that builds the same files in the browser.
 
+[2.2.0]: ../../releases/tag/v2.2.0
 [2.1.0]: ../../releases/tag/v2.1.0
 [2.0.0]: ../../releases/tag/v2.0.0

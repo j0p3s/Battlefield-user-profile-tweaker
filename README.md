@@ -94,7 +94,7 @@ No executables, no DLLs, no game files modified. It's a single, fully commented 
 1. **Menu.** Every game is listed, showing whether it's installed and whether its settings file was found:
 
    ```
-   === Battlefield Optimizer v2.1.0 ===
+   === Battlefield Optimizer v2.2.0 ===
    Which game do you want to optimize?
 
      1) Battlefield 4   [installed, settings found]
@@ -123,7 +123,7 @@ No executables, no DLLs, no game files modified. It's a single, fully commented 
 #### Example output (Battlefield 4)
 
 ```
-=== Battlefield Optimizer v2.1.0 - Battlefield 4 (user.cfg + PROFSAVE_profile) ===
+=== Battlefield Optimizer v2.2.0 - Battlefield 4 (user.cfg + PROFSAVE_profile) ===
 
 --- Hardware ---
 CPU      : Intel(R) Core(TM) i7-8700K CPU @ 3.70GHz  (6 cores / 12 threads)
@@ -183,7 +183,9 @@ It needs **no install**: like the script, it is one plain-text `.cmd` file that 
 3. Double-click `Battlefield_Optimizer_GUI.cmd`. (From the script's menu you can also type `G`.)
 4. Choose the options below, then click a button.
 
-> The GUI loads the detection and tuning code from `Battlefield_Optimizer.cmd` when it starts, so a fix or a new GPU rule in the script automatically applies to the GUI too. If the script isn't next to it, the GUI asks you to select it.
+> The GUI loads the detection and tuning code from `Battlefield_Optimizer.cmd` when it starts, so a fix or a new GPU rule in the script automatically applies to the GUI too. If the script isn't next to it, the GUI asks you to select it. If several copies are in the folder, the one with the highest version is used, and a script older than the GUI is refused with a message telling you what to download.
+>
+> Your choices are remembered between runs (in `%APPDATA%\Battlefield Optimizer\gui-settings.json`). **Reset choices** brings back the defaults.
 
 ### What you can choose
 
@@ -193,7 +195,7 @@ It needs **no install**: like the script, it is one plain-text `.cmd` file that 
 | **Detected hardware** | CPU, RAM, GPU and VRAM, laptop or desktop, monitor and VRR hints (read-only) |
 | **2. Graphics** | Generate `PROFSAVE_profile` on or off. Tier: **Auto** (from your GPU) or force Low / Medium / High. Tick or untick each tweak group (see below) |
 | **3. Display and FPS cap** | G-Sync / FreeSync enabled, refresh rate, FPS cap **Auto**, **Custom value** or **No limit**. The result and the reason are shown live |
-| **4. user.cfg** | BF4 / BF1 / BF V: FPS counter, render queue, triple buffering / V-Sync / motion blur off. BF6: CPU thread settings |
+| **4. user.cfg** | BF4 / BF1 / BF V: FPS counter, render queue, triple buffering / V-Sync / motion blur off. BF6: CPU thread settings, plus optional [experimental extras](#battlefield-6-extras-optional) (off by default) |
 
 **Tweak groups you can switch on or off:**
 
@@ -207,6 +209,8 @@ It needs **no install**: like the script, it is one plain-text `.cmd` file that 
 - BF1 only: force DirectX 11
 - Graphics preset from the GPU tier (textures, meshes, terrain, shadows, effects, anti-aliasing...)
 
+Each group shows how many settings it holds for the selected game and tier, and hovering over it lists them. Groups the game doesn't have (for example lens effects in BF4) are greyed out.
+
 A group you untick is left **exactly as it is** in your current profile. If you untick everything, no profile is generated.
 
 ### Buttons
@@ -214,9 +218,10 @@ A group you untick is left **exactly as it is** in your current profile. If you 
 | Button | What it does |
 |---|---|
 | **Generate files (preview only)** | Writes `user.cfg`, `PROFSAVE_profile` and `README.txt` to the `<game>_Optimized` folder and shows every change in the log. Nothing in the game is touched |
-| **Generate and apply to the game (with backup)** | Does the same, then asks for confirmation, waits until the game is closed, backs up your current files and copies the new ones. Windows asks for admin rights only if the game folder needs them |
-| **Undo last apply (restore backups)** | Restores the newest backup of `PROFSAVE_profile` and `user.cfg`. Each click goes one step further back |
+| **Generate and apply to the game (with backup)** | First waits until the game is closed (it saves its profile when it exits, so the new file must be built from that copy), then does the same as above, asks for confirmation with the number of changes, backs up your current files and copies the new ones. Windows asks for admin rights only if the game folder needs them |
+| **Undo last apply (restore backups)** | Shows the date of each backup, then restores the newest backup of `PROFSAVE_profile` and `user.cfg`. Each click goes one step further back |
 | **Open output folder** | Opens the `<game>_Optimized` folder in File Explorer |
+| **Reset choices** | Puts every option back to its default (tier Auto, all groups ticked, FPS cap Auto, detected refresh rate and VRR) |
 
 The backups use the same `.bak_YYYYMMDD_HHMMSS` files as the script, so you can apply with one and undo with the other.
 
@@ -296,6 +301,15 @@ The presets favor **visibility, low input lag and frame rate** for competitive p
 | `GstRender.Thread.MaxProcessorCount` | your thread count |
 
 If you already have a `user.cfg`, the script keeps your own lines and only replaces the commands it manages.
+
+#### Battlefield 6 extras (optional)
+
+The script asks (and the GUI has a checkbox) whether to add two more lines. They are **off by default** because I could not find a public source confirming that BF6 honours them; the engine ignores a console command it does not know, so the worst case is no effect. If the game behaves worse, use Undo.
+
+| Command | Value | Purpose |
+|---|---|---|
+| `PerfOverlay.DrawFps` | `1` | On-screen FPS counter, as in the older games |
+| `Thread.MaxWorkerThreadCount` | your thread count | Worker thread limit |
 
 ### GPU tiers
 
@@ -448,7 +462,7 @@ The script also warns you if Windows runs your monitor below its maximum refresh
 - It only touches the games' own plain-text config files. No DLLs, no injection, no game files modified, no registry changes.
 - Admin rights are requested only to copy `user.cfg` into a protected game folder, and only for that one copy.
 - `ExecutionPolicy Bypass` applies to this one PowerShell process only. Your system policy isn't changed.
-- **The GUI** only reads the script next to it to reuse its code. It has the same backup and Undo behavior, and nothing is changed until you click **Generate and apply** and confirm.
+- **The GUI** only reads the script next to it to reuse its code. It has the same backup and Undo behavior, and nothing is changed until you click **Generate and apply** and confirm. It saves only its own window choices in `%APPDATA%\Battlefield Optimizer\gui-settings.json`.
 - **The web page** never uploads anything: your profile is read and edited in your browser.
 
 **Restoring by hand:** close the game, delete the new file, and rename the newest `.bak_` file back to `PROFSAVE_profile` or `user.cfg`. Alternatively, in-game, choose a graphics preset and apply it; the game rewrites the profile with its own values.
@@ -464,6 +478,9 @@ The script also warns you if Windows runs your monitor below its maximum refresh
 
 **Do the script and the GUI give different results?**
 No. The GUI loads the script's own code, so with the default choices (tier Auto, FPS cap Auto, every box ticked) both produce the same files.
+
+**Why does it ask me to close the game first?**
+The games rewrite `PROFSAVE_profile` when they exit. A file built while the game is still open would be based on outdated settings, and copying it afterwards would overwrite whatever you changed in that session (keybinds, for example). The GUI therefore waits for the game to close *before* reading the profile. The script does the same; if you continue anyway by typing `C`, it rebuilds the profile from the game's saved copy once the game is closed.
 
 **Can I get banned for this?**
 `user.cfg` and `PROFSAVE_profile` are the games' own configuration files, used by the community for years. Neither option modifies game files, injects code or touches memory. Still, use them at your own risk; see the [Disclaimer](#disclaimer).
@@ -502,7 +519,7 @@ The script asks for the refresh rate of the monitor you play on. On the web page
 | Windows shows 60 Hz on a high refresh monitor | Settings > System > Display > Advanced display > pick the highest refresh rate, then run the script again. |
 | "Permission declined" when copying `user.cfg` | Accept the Windows admin prompt, or copy the file by hand from the `<game>_Optimized` folder. |
 | Settings reverted after playing | You probably changed video options in-game. Run the script again. |
-| The GUI says the engine section was not found, or asks for a file | Keep `Battlefield_Optimizer.cmd` (v2.0.0 or newer) in the same folder as the GUI, or select it when asked. The file must not be renamed to something that doesn't start with `Battlefield_Optimizer`. |
+| The GUI says the engine section was not found, says the script is too old, or asks for a file | Keep `Battlefield_Optimizer.cmd` (v2.2.0 or newer, from the same release as the GUI) in the same folder as the GUI, or select it when asked. The file must not be renamed to something that doesn't start with `Battlefield_Optimizer`. |
 | The GUI doesn't open and nothing happens | Make sure the file still ends in `.cmd`, not `.cmd.txt`, and unblock it as described above. If a message box appears, please include its text in an issue. |
 | The `G` option is missing from the script's menu | `Battlefield_Optimizer_GUI.cmd` must be in the same folder as the script. |
 | The GUI says "There is nothing to apply" | Every option is unticked, or no settings file was found. Tick at least one option and, for BF V / BF6, start the game once first. |
@@ -518,6 +535,7 @@ The script asks for the refresh rate of the monitor you play on. On the web page
 - **Some values are undocumented by the games**, such as anti-aliasing levels in BF1. Check the in-game options after applying.
 - **The script and the GUI are Windows only.** The web page works anywhere.
 - **The GUI needs the script next to it.** It doesn't carry its own copy of the tuning rules.
+- **The BF6 extras are unverified.** They are optional and off by default.
 - It has been tested on a limited number of systems, so feedback is very welcome.
 
 ---
@@ -536,7 +554,7 @@ Issues and pull requests are welcome! These are especially useful:
 - GPU tiers are in `Get-GpuTierClassic` and `Get-GpuTierBf6`. Rules are checked top to bottom and the first match wins, so put exceptions above broader patterns.
 - Graphics values are in `Get-ProfileSettingsBf4`, `...Bf1`, `...Bfv` and `...Bf6`.
 
-**Editing the GUI:** `Battlefield_Optimizer_GUI.cmd` extracts everything from the `$Games = [ordered]@{` line down to the `#  OPTIMIZER RUN (one game)` heading of the script, so keep those two markers in place when you edit the script. The tweak groups are the `$Cats` table at the top of the GUI; each profile key belongs to the first group whose pattern matches it.
+**Editing the GUI:** `Battlefield_Optimizer_GUI.cmd` extracts everything from the `$Games = [ordered]@{` line down to the `#  OPTIMIZER RUN (one game)` heading of the script, so keep those two markers in place when you edit the script. Anything the GUI calls (for example `Get-DriverAdvice`, `Get-HwWarnings`, `Get-Bf6ExtraCfg`, `Test-GameRunning`) must stay above the second marker. The tweak groups are the `$Cats` table at the top of the GUI; each profile key belongs to the first group whose pattern matches it. When the GUI starts using a new function from the script, raise `$MinEngine` in the GUI so an older script is refused cleanly.
 
 **Editing the web page:** `index.html` is a single self-contained file. The CPU and GPU lists are at the top of its script.
 

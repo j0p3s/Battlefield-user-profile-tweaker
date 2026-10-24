@@ -40,7 +40,7 @@ exit /b
 #  GUI loads this script's detection and tuning code, so both always agree.
 # =============================================================================
 
-$AppVersion = '2.1.0'
+$AppVersion = '2.2.0'
 
 # Latin-1 maps every byte to one character and back, so files read and
 # written with it keep any non-ASCII byte exactly as it was.
@@ -264,8 +264,11 @@ function Get-MainGpu {
     }
     # Ignore virtual / remote-desktop display adapters
     $list = @($list | Where-Object { $_.Name -notmatch 'Basic|Virtual|Parsec|Remote|Mirage|DisplayLink|Meta' })
-    # Prefer NVIDIA/AMD/Arc, then the one with the most VRAM
-    $list | Sort-Object @{ e = { if ($_.Name -match 'NVIDIA|GeForce|RTX|GTX|Radeon|AMD|Arc') { 1 } else { 0 } }; Descending = $true },
+    # Prefer a discrete GPU (NVIDIA, Radeon RX/Pro, Arc A/B), then any other AMD/Intel
+    # one, then the one with the most VRAM. Without the first step, the integrated
+    # Radeon of a laptop CPU could win over the dedicated card when its memory
+    # carve-out is bigger.
+    $list | Sort-Object @{ e = { if ($_.Name -match 'NVIDIA|GeForce|RTX|GTX|Quadro|Radeon(\(TM\))? (RX|Pro)|Arc(\(TM\))? [AB]\d') { 2 } elseif ($_.Name -match 'AMD|Radeon|Intel|Arc') { 1 } else { 0 } }; Descending = $true },
                         @{ e = 'VramGB'; Descending = $true } | Select-Object -First 1
 }
 
@@ -508,14 +511,26 @@ function Restore-File([string]$path) {
 }
 
 # -----------------------------------------------------------------------------
-# Wait-GameClosed
+# Test-GameRunning / Wait-GameClosed
 # Every game saves PROFSAVE_profile when it exits, which would undo any change.
+# Wait-GameClosed returns $true once the game is closed. With $AllowSkip the
+# user may type C to continue anyway, and it then returns $false.
 # -----------------------------------------------------------------------------
-function Wait-GameClosed($g) {
-    while (Get-Process -Name $g.Procs -ErrorAction SilentlyContinue) {
-        Write-Host "$($g.Name) is running. Close the game and press Enter." -ForegroundColor Yellow
-        [void](Read-Host)
+function Test-GameRunning($g) {
+    [bool](Get-Process -Name $g.Procs -ErrorAction SilentlyContinue)
+}
+
+function Wait-GameClosed($g, [bool]$AllowSkip = $false) {
+    while (Test-GameRunning $g) {
+        if ($AllowSkip) {
+            Write-Host "$($g.Name) is running. Close the game and press Enter, or type C to continue anyway." -ForegroundColor Yellow
+            if ((Read-Host) -match '^[cC]') { return $false }
+        } else {
+            Write-Host "$($g.Name) is running. Close the game and press Enter." -ForegroundColor Yellow
+            [void](Read-Host)
+        }
     }
+    $true
 }
 
 
@@ -676,7 +691,7 @@ function Get-GpuTierBf6($gpu) {
         # --- NVIDIA (exceptions first, then general rules) ---
         @{ T = 3; R = 'RTX 3060 Ti|RTX 4060(?! Laptop)' }                        # desktop 3060 Ti, 4060, 4060 Ti
         @{ T = 1; R = 'RTX (2050|3050)|RTX 2060(?! SUPER)' }
-        @{ T = 2; R = 'RTX (2060|2070|3060|4050|4060|5050)' }                    # incl. laptop 4050/4060
+        @{ T = 2; R = 'RTX (2060|2070|3060|4050|4060|5050|5060 Laptop)' }       # incl. laptop 4050/4060/5060
         @{ T = 3; R = 'RTX' }                                                    # 2080 and up, 3070 and up, 40/50 series
         @{ T = 2; R = 'GTX 1080 Ti|TITAN (Xp|V)\b' }
         @{ T = 1; R = 'GTX|GeForce (GT|MX) ?\d' }
@@ -1024,6 +1039,76 @@ function Get-ProfileSettingsBf6([int]$tier, [int]$threads, [int]$cores, [double]
 
 
 # =============================================================================
+#  SHARED: EXTRAS, WARNINGS AND DRIVER ADVICE
+#  Used by the script and the GUI, so both always say the same thing.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Get-Bf6ExtraCfg
+# Optional BF6 user.cfg lines. They are opt-in and never part of the default
+# output: no public source confirms that BF6 honours them (the engine ignores
+# a console command it does not know, so the worst case is no effect).
+# PerfOverlay.DrawFps is the same on-screen FPS counter the older games use.
+# -----------------------------------------------------------------------------
+function Get-Bf6ExtraCfg([int]$threads) {
+    @('PerfOverlay.DrawFps 1', "Thread.MaxWorkerThreadCount $threads")
+}
+
+# -----------------------------------------------------------------------------
+# Get-HwWarnings
+# Problems found in the detected hardware, as plain sentences. $hz is the
+# refresh rate Windows reports. The monitor check is only reliable with one
+# display: with several, the Hz cannot be matched to a monitor.
+# -----------------------------------------------------------------------------
+function Get-HwWarnings($g, $hw, [int]$hz) {
+    $w = @()
+    if ($g.Id -eq 'bf6' -and $hw.RamGB -and $hw.RamGB -lt 16) {
+        $w += ("BF6 needs 16 GB of RAM; with {0} GB expect stutter." -f $hw.RamGB)
+    }
+    $mons = @($hw.Mons)
+    if ($mons.Count -eq 1 -and $mons[0].MaxHz -and $hz -and ($hz + 5) -lt $mons[0].MaxHz) {
+        $w += ("the monitor supports up to {0} Hz but Windows is set to {1} Hz. Change it in Settings > Display > Advanced display." -f $mons[0].MaxHz, $hz)
+    }
+    $w
+}
+
+# -----------------------------------------------------------------------------
+# Get-DriverAdvice
+# Graphics driver settings that go with the generated files (one line each).
+# -----------------------------------------------------------------------------
+function Get-DriverAdvice($g, $gpu, [bool]$vrr) {
+    $bf6 = $g.Id -eq 'bf6'
+    $l = @()
+    switch (Get-GpuVendor "$($gpu.Name)") {
+        'NVIDIA' {
+            if ($vrr) { $l += '   - NVIDIA Control Panel: G-Sync on + V-Sync ON (keep V-Sync off in-game)' }
+            else      { $l += '   - NVIDIA Control Panel: V-Sync off' }
+            if ($bf6) { $l += '   - Low Latency Mode: leave Off (NVIDIA Reflex is turned on in-game instead)' }
+            else      { $l += '   - Low Latency Mode: On' }
+        }
+        'AMD' {
+            if ($vrr) { $l += '   - AMD Adrenalin: FreeSync on + Wait for Vertical Refresh "Always on" (keep V-Sync off in-game)' }
+            else      { $l += '   - AMD Adrenalin: Wait for Vertical Refresh off' }
+            if ($bf6) { $l += '   - Anti-Lag: turned on in-game by the profile' }
+            else      { $l += '   - Radeon Anti-Lag: on' }
+        }
+        'Intel' {
+            if ($vrr) { $l += '   - Intel Graphics Software / Arc Control: Adaptive Sync on (keep V-Sync off in-game)' }
+            else      { $l += '   - Intel Graphics Software / Arc Control: V-Sync off' }
+            if ($bf6) { $l += '   - Low latency (XeLL): turned on in-game by the profile' }
+            else      { $l += '   - Low Latency: on (if your driver offers it)' }
+        }
+        default {
+            if ($bf6) { $l += '   - V-Sync off in the driver' }
+            else      { $l += '   - V-Sync off in the driver; turn on its low-latency option if it has one' }
+        }
+    }
+    $l += '   - Power management: prefer maximum performance'
+    $l
+}
+
+
+# =============================================================================
 #  OPTIMIZER RUN (one game)
 # =============================================================================
 
@@ -1032,7 +1117,7 @@ function Get-ProfileSettingsBf6([int]$tier, [int]$threads, [int]$cores, [double]
 # Restores the newest backup of the game's PROFSAVE_profile and user.cfg.
 # -----------------------------------------------------------------------------
 function Invoke-Undo($g, $loc) {
-    Wait-GameClosed $g
+    [void](Wait-GameClosed $g)
     foreach ($f in @($loc.ProfPath, $loc.UserCfgPath)) {
         if (-not $f) { continue }
         $name = Split-Path -Leaf $f
@@ -1082,6 +1167,15 @@ function Invoke-Optimizer($g, [string]$scriptDir) {
         Write-Host ''
     }
 
+    # --- The games save PROFSAVE_profile when they exit. Read it only after the game
+    #     is closed: otherwise the new file is built from outdated settings and would
+    #     overwrite whatever you changed during that session. ---
+    $ranAtStart = $false
+    if (Test-GameRunning $g) {
+        Write-Host "$($g.Name) is running. It saves your settings when it closes, so close it now to use the latest ones." -ForegroundColor Yellow
+        $ranAtStart = -not (Wait-GameClosed $g $true)
+    }
+
     # --- Output folder: "<game>_Optimized" next to this script, or on the Desktop if that is read-only ---
     $outDir = Join-Path $scriptDir "$($g.Short)_Optimized"
     [void](New-Item -ItemType Directory -Path $outDir -Force -ErrorAction SilentlyContinue)
@@ -1114,13 +1208,8 @@ function Invoke-Optimizer($g, [string]$scriptDir) {
         $vrrTxt = if ($tags) { $tags -join ', ' } else { 'no VRR advertised in EDID' }
         Say ("Monitor  : {0}{1} | {2}" -f $m.Name, $range, $vrrTxt)
     }
-    if ($id -eq 'bf6' -and $hw.RamGB -and $hw.RamGB -lt 16) { Say ("WARNING: BF6 needs 16 GB of RAM; with {0} GB expect stutter." -f $hw.RamGB) 'Yellow' }
-
-    # Warn if Windows runs the monitor below its maximum refresh rate. Only
-    # reliable with one display: with several, the Hz cannot be matched to a monitor.
-    if ($mons.Count -eq 1 -and $mons[0].MaxHz -and $hz -and ($hz + 5) -lt $mons[0].MaxHz) {
-        Say ("WARNING: the monitor supports up to {0} Hz but Windows is set to {1} Hz. Change it in Settings > Display > Advanced display." -f $mons[0].MaxHz, $hz) 'Yellow'
-    }
+    # Low RAM, or Windows running the monitor below its maximum refresh rate
+    foreach ($w in Get-HwWarnings $g $hw $hz) { Say "WARNING: $w" 'Yellow' }
     # Refresh rate questions are asked once per session and reused for every game
     if (-not $hz -or $hz -lt 30) {
         if ($null -eq $hw.HzAnswer) {
@@ -1226,10 +1315,15 @@ function Invoke-Optimizer($g, [string]$scriptDir) {
                 'Thread.JobThreadPriority 0',
                 "GstRender.Thread.MaxProcessorCount $threads"
             )
+            # Optional and off by default: no public source confirms these lines for BF6
+            $ex = Read-Host 'Also add the experimental extras (FPS counter + worker thread count)? Unverified in BF6. [Y/N] (Enter = N)'
+            $extras = [bool]($ex -match '^[yYsS]')
+            if ($extras) { $cfg += Get-Bf6ExtraCfg $threads }
             $keptCfg = Build-UserCfg $userCfgPath $cfg $outCfg
             $cfg | ForEach-Object { Say "  $_" }
             if ($keptCfg) { Say ("Kept {0} line(s) from your existing user.cfg." -f $keptCfg) }
             Say "Threads      : $cores cores / $threads logical processors (update it after a CPU upgrade)"
+            if ($extras) { Say 'Extras       : experimental; if BF6 behaves worse, run this script again and choose Undo.' 'Yellow' }
         } else {
             Say 'CPU core count could not be read: no user.cfg was generated.' 'Yellow'
         }
@@ -1355,31 +1449,7 @@ function Invoke-Optimizer($g, [string]$scriptDir) {
     }
     Say ''
     Say "3) Graphics driver settings for $($g.Exe):"
-    switch (Get-GpuVendor $gpu.Name) {
-        'NVIDIA' {
-            if ($vrr) { Say '   - NVIDIA Control Panel: G-Sync on + V-Sync ON (keep V-Sync off in-game)' }
-            else      { Say '   - NVIDIA Control Panel: V-Sync off' }
-            if ($id -eq 'bf6') { Say '   - Low Latency Mode: leave Off (NVIDIA Reflex is turned on in-game instead)' }
-            else               { Say '   - Low Latency Mode: On' }
-        }
-        'AMD' {
-            if ($vrr) { Say '   - AMD Adrenalin: FreeSync on + Wait for Vertical Refresh "Always on" (keep V-Sync off in-game)' }
-            else      { Say '   - AMD Adrenalin: Wait for Vertical Refresh off' }
-            if ($id -eq 'bf6') { Say '   - Anti-Lag: turned on in-game by the profile' }
-            else               { Say '   - Radeon Anti-Lag: on' }
-        }
-        'Intel' {
-            if ($vrr) { Say '   - Intel Graphics Software / Arc Control: Adaptive Sync on (keep V-Sync off in-game)' }
-            else      { Say '   - Intel Graphics Software / Arc Control: V-Sync off' }
-            if ($id -eq 'bf6') { Say '   - Low latency (XeLL): turned on in-game by the profile' }
-            else               { Say '   - Low Latency: on (if your driver offers it)' }
-        }
-        default {
-            if ($id -eq 'bf6') { Say '   - V-Sync off in the driver' }
-            else               { Say '   - V-Sync off in the driver; turn on its low-latency option if it has one' }
-        }
-    }
-    Say '   - Power management: prefer maximum performance'
+    foreach ($l in Get-DriverAdvice $g $gpu $vrr) { Say $l }
     if ($id -eq 'bf1') {
         Say ''
         Say 'Note: the profile switches BF1 to DirectX 11 (more stable frame times than DX12).' 'DarkGray'
@@ -1392,7 +1462,12 @@ function Invoke-Optimizer($g, [string]$scriptDir) {
     Write-Host ''
     $ap = Read-Host 'Copy the files to those locations now? [Y/N] (Enter = N)'
     if ($ap -match '^[yYsS]') {
-        Wait-GameClosed $g
+        [void](Wait-GameClosed $g)
+        if ($ranAtStart -and $haveProf) {
+            # The game was still running when its profile was read and has saved its own copy since
+            [void](Build-Profile $profPath $settings $outProf $g.Eol)
+            Write-Host 'The game saved its settings when it closed: PROFSAVE_profile was rebuilt from them.' -ForegroundColor DarkGray
+        }
         $stamp = Get-Date -Format yyyyMMdd_HHmmss
 
         # PROFSAVE_profile lives in Documents, so no admin rights are needed
