@@ -94,7 +94,7 @@ No executables, no DLLs, no game files modified. It's a single, fully commented 
 1. **Menu.** Every game is listed, showing whether it's installed and whether its settings file was found:
 
    ```
-   === Battlefield Optimizer v2.2.0 ===
+   === Battlefield Optimizer v2.2.1 ===
    Which game do you want to optimize?
 
      1) Battlefield 4   [installed, settings found]
@@ -123,7 +123,7 @@ No executables, no DLLs, no game files modified. It's a single, fully commented 
 #### Example output (Battlefield 4)
 
 ```
-=== Battlefield Optimizer v2.2.0 - Battlefield 4 (user.cfg + PROFSAVE_profile) ===
+=== Battlefield Optimizer v2.2.1 - Battlefield 4 (user.cfg + PROFSAVE_profile) ===
 
 --- Hardware ---
 CPU      : Intel(R) Core(TM) i7-8700K CPU @ 3.70GHz  (6 cores / 12 threads)
@@ -195,7 +195,7 @@ It needs **no install**: like the script, it is one plain-text `.cmd` file that 
 | **Detected hardware** | CPU, RAM, GPU and VRAM, laptop or desktop, monitor and VRR hints (read-only) |
 | **2. Graphics** | Generate `PROFSAVE_profile` on or off. Tier: **Auto** (from your GPU) or force Low / Medium / High. Tick or untick each tweak group (see below) |
 | **3. Display and FPS cap** | G-Sync / FreeSync enabled, refresh rate, FPS cap **Auto**, **Custom value** or **No limit**. The result and the reason are shown live |
-| **4. user.cfg** | BF4 / BF1 / BF V: FPS counter, render queue, triple buffering / V-Sync / motion blur off. BF6: CPU thread settings, plus optional [experimental extras](#battlefield-6-extras-optional) (off by default) |
+| **4. user.cfg** | **FPS counter** (every game, on by default). BF4 / BF1 / BF V: render queue, triple buffering / V-Sync / motion blur off. BF6: CPU thread settings, plus one optional [experimental extra](#battlefield-6-extra-optional) (off by default) |
 
 **Tweak groups you can switch on or off:**
 
@@ -283,7 +283,7 @@ The presets favor **visibility, low input lag and frame rate** for competitive p
 
 | Command | Value | Purpose |
 |---|---|---|
-| `PerfOverlay.DrawFps` | `1` | On-screen FPS counter; set it to `0` to hide it |
+| `PerfOverlay.DrawFps` | `1` | On-screen FPS counter. The script asks (Enter = yes) and the GUI has a checkbox; if you say no, nothing is written, except that a counter your existing `user.cfg` turns on is switched off (`0`) |
 | `GameTime.MaxVariableFps` | see above | Frame rate cap |
 | `RenderDevice.RenderAheadLimit` | `1`, or `2` on CPUs with 4 threads or fewer | Frames the CPU queues ahead of the GPU; fewer means less input lag |
 | `RenderDevice.TripleBufferingEnable` | `0` | Triple buffering adds latency |
@@ -302,13 +302,14 @@ The presets favor **visibility, low input lag and frame rate** for competitive p
 
 If you already have a `user.cfg`, the script keeps your own lines and only replaces the commands it manages.
 
-#### Battlefield 6 extras (optional)
+The same **FPS counter** option (`PerfOverlay.DrawFps 1`) exists for BF6 too. It is known to work in BF4, BF1 and BF V; I could not find a public source confirming it in BF6. If the game ignores it, nothing happens.
 
-The script asks (and the GUI has a checkbox) whether to add two more lines. They are **off by default** because I could not find a public source confirming that BF6 honours them; the engine ignores a console command it does not know, so the worst case is no effect. If the game behaves worse, use Undo.
+#### Battlefield 6 extra (optional)
+
+The script asks (and the GUI has a checkbox) whether to add one more line. It is **off by default** because I could not find a public source confirming that BF6 honours it; the engine ignores a console command it does not know, so the worst case is no effect. If the game behaves worse, use Undo.
 
 | Command | Value | Purpose |
 |---|---|---|
-| `PerfOverlay.DrawFps` | `1` | On-screen FPS counter, as in the older games |
 | `Thread.MaxWorkerThreadCount` | your thread count | Worker thread limit |
 
 ### GPU tiers
@@ -519,7 +520,7 @@ The script asks for the refresh rate of the monitor you play on. On the web page
 | Windows shows 60 Hz on a high refresh monitor | Settings > System > Display > Advanced display > pick the highest refresh rate, then run the script again. |
 | "Permission declined" when copying `user.cfg` | Accept the Windows admin prompt, or copy the file by hand from the `<game>_Optimized` folder. |
 | Settings reverted after playing | You probably changed video options in-game. Run the script again. |
-| The GUI says the engine section was not found, says the script is too old, or asks for a file | Keep `Battlefield_Optimizer.cmd` (v2.2.0 or newer, from the same release as the GUI) in the same folder as the GUI, or select it when asked. The file must not be renamed to something that doesn't start with `Battlefield_Optimizer`. |
+| The GUI says the engine section was not found, says the script is too old, or asks for a file | Keep `Battlefield_Optimizer.cmd` (v2.2.1 or newer, from the same release as the GUI) in the same folder as the GUI, or select it when asked. The file must not be renamed to something that doesn't start with `Battlefield_Optimizer`. |
 | The GUI doesn't open and nothing happens | Make sure the file still ends in `.cmd`, not `.cmd.txt`, and unblock it as described above. If a message box appears, please include its text in an issue. |
 | The `G` option is missing from the script's menu | `Battlefield_Optimizer_GUI.cmd` must be in the same folder as the script. |
 | The GUI says "There is nothing to apply" | Every option is unticked, or no settings file was found. Tick at least one option and, for BF V / BF6, start the game once first. |
@@ -535,7 +536,7 @@ The script asks for the refresh rate of the monitor you play on. On the web page
 - **Some values are undocumented by the games**, such as anti-aliasing levels in BF1. Check the in-game options after applying.
 - **The script and the GUI are Windows only.** The web page works anywhere.
 - **The GUI needs the script next to it.** It doesn't carry its own copy of the tuning rules.
-- **The BF6 extras are unverified.** They are optional and off by default.
+- **The BF6 extra and the BF6 FPS counter are unverified.** The extra is optional and off by default; the counter line is harmless if the game ignores it.
 - It has been tested on a limited number of systems, so feedback is very welcome.
 
 ---

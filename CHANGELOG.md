@@ -2,6 +2,16 @@
 
 All notable changes to this project are listed here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.2.1] - 2026-10-24
+
+### Added
+- **FPS counter option for every game, BF6 included.** The script now asks "Show the FPS counter inside the game?" (Enter = yes) and writes `PerfOverlay.DrawFps 1` to `user.cfg`. In the GUI the checkbox is shown for BF6 too and is on by default. It is known to work in BF4, BF1 and BF V; it is not confirmed for BF6, where the game simply ignores an unknown command.
+
+### Changed
+- The BF6 experimental extra is now only `Thread.MaxWorkerThreadCount`; the FPS counter moved to the regular option above.
+- Saying no to the FPS counter writes nothing, unless your existing `user.cfg` turns the counter on: then `PerfOverlay.DrawFps 0` replaces that line, so the counter really goes off. (Before, the script always wrote the counter for BF4 / BF1 / BF V, and an unticked GUI box left an old line in place.)
+- Script and GUI version numbers are now 2.2.1. The GUI needs script 2.2.1 or newer.
+
 ## [2.2.0] - 2026-10-24
 
 ### Added
@@ -56,6 +66,7 @@ All notable changes to this project are listed here, newest first. The format fo
 - Monitor EDID reading for the refresh range and G-Sync / FreeSync hints, confirmed by the user.
 - Web page (Config Builder) that builds the same files in the browser.
 
+[2.2.1]: ../../releases/tag/v2.2.1
 [2.2.0]: ../../releases/tag/v2.2.0
 [2.1.0]: ../../releases/tag/v2.1.0
 [2.0.0]: ../../releases/tag/v2.0.0

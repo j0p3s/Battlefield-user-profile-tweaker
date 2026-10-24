@@ -36,8 +36,8 @@ function Show-Error([string]$m) {
 try {
 
 $scriptDir  = Split-Path -Parent $env:BFCFG_SCRIPT
-$GuiVersion = '2.2.0'
-$MinEngine  = [version]'2.2.0'      # first script version with the functions this GUI calls
+$GuiVersion = '2.2.1'
+$MinEngine  = [version]'2.2.1'      # first script version with the functions this GUI calls
 $RepoUrl    = 'https://github.com/j0p3s/battlefield-user-profile-tweaker'
 $Latin1     = [Text.Encoding]::GetEncoding(28591)
 $Invariant  = [Globalization.CultureInfo]::InvariantCulture
@@ -224,14 +224,15 @@ $lblCap = New-Label $gD '' 15 140 405 44
 
 # --- 4. user.cfg ---
 $gC = New-Group '4. user.cfg (game folder)' 450 202 430 128
-$cbCfgCounter = New-Check $gC 'Show on-screen FPS counter' 15 22
+$cbCfgCounter = New-Check $gC 'Show the FPS counter inside the game' 15 22
 $cbCfgRal     = New-Check $gC 'Render queue: lowest input lag (2 frames on 4 threads or fewer)' 15 46
 $cbCfgMisc    = New-Check $gC 'Triple buffering, V-Sync and motion blur off' 15 70
-$cbCfgThreads = New-Check $gC 'BF6: CPU thread settings (cores / logical processors)' 15 22
-$cbCfgExtra   = New-Check $gC 'BF6 extras: FPS counter + worker threads (unverified)' 15 46 405 $false
+$cbCfgThreads = New-Check $gC 'BF6: CPU thread settings (cores / logical processors)' 15 46
+$cbCfgExtra   = New-Check $gC 'BF6 extra: worker thread count (unverified)' 15 70 405 $false
 $lblCfgNote   = New-Label $gC '' 15 98 405 22
 $lblCfgNote.ForeColor = [Drawing.Color]::DimGray
-$tt.SetToolTip($cbCfgExtra, "Adds PerfOverlay.DrawFps 1 and Thread.MaxWorkerThreadCount <your thread count>.`r`nNo public source confirms that BF6 honours these lines, so they are off by default.`r`nIf the game behaves worse, use Undo.")
+$tt.SetToolTip($cbCfgExtra, "Adds Thread.MaxWorkerThreadCount <your thread count>.`r`nNo public source confirms that BF6 honours this line, so it is off by default.`r`nIf the game behaves worse, use Undo.")
+$tt.SetToolTip($cbCfgCounter, "Writes PerfOverlay.DrawFps 1 (on-screen FPS counter).`r`nUnticked: nothing is written, unless your current user.cfg has the counter on;`r`nthen it is switched off (PerfOverlay.DrawFps 0).`r`nWorks in BF4, BF1 and BF V. Not confirmed for BF6: if the game ignores it, it is harmless.")
 $tt.SetToolTip($cbCfgThreads, "Thread.ProcessorCount / MaxProcessorCount = physical cores,`r`nGstRender.Thread.MaxProcessorCount = logical processors.`r`nThe community fix for BF6's high CPU usage.")
 
 # --- Buttons ---
@@ -338,7 +339,7 @@ function Update-Ui {
     $cbCapMode.Enabled = $cbFps.Checked
     $cap = Get-EffCap
     $lblCap.Text = if ($cap.Cap -gt 0) { "Result: $($cap.Cap) FPS  ($($cap.Why))" } else { "Result: limiter off  ($($cap.Why))" }
-    $cbCfgCounter.Visible = $classic; $cbCfgRal.Visible = $classic; $cbCfgMisc.Visible = $classic
+    $cbCfgRal.Visible = $classic; $cbCfgMisc.Visible = $classic
     $cbCfgThreads.Visible = -not $classic; $cbCfgExtra.Visible = -not $classic
     $lblCfgNote.Text = if ($classic) { 'Your own lines in an existing user.cfg are kept.' } else { 'Optional. If BF6 behaves worse, use Undo.' }
 
@@ -487,17 +488,18 @@ function Invoke-Generate {
 
     # ---- user.cfg ----
     $cfg = @()
+    $fpsLine = Get-FpsCounterCfg $userCfgPath $cbCfgCounter.Checked
+    if ($fpsLine) { $cfg += $fpsLine }
     if ($classic) {
         $ral = if ($hw.Threads -le 4) { 2 } else { 1 }
         # "No limit" is written as a high number instead of 0, whose meaning is not documented
         $cfgCap = if ($cap -gt 0) { $cap } else { 999 }
-        if ($cbCfgCounter.Checked) { $cfg += 'PerfOverlay.DrawFps 1' }
         if ($cbFps.Checked)        { $cfg += "GameTime.MaxVariableFps $cfgCap" }
         if ($cbCfgRal.Checked)     { $cfg += "RenderDevice.RenderAheadLimit $ral" }
         if ($cbCfgMisc.Checked)    { $cfg += 'RenderDevice.TripleBufferingEnable 0', 'RenderDevice.VSyncEnable 0', 'WorldRender.MotionBlurEnable 0' }
     } else {
         if ($cbCfgThreads.Checked -and $hw.Cores -and $hw.Threads) {
-            $cfg = @("Thread.ProcessorCount $($hw.Cores)", "Thread.MaxProcessorCount $($hw.Cores)",
+            $cfg += @("Thread.ProcessorCount $($hw.Cores)", "Thread.MaxProcessorCount $($hw.Cores)",
                      'Thread.MinFreeProcessorCount 0', 'Thread.JobThreadPriority 0',
                      "GstRender.Thread.MaxProcessorCount $($hw.Threads)")
         }
@@ -509,6 +511,8 @@ function Invoke-Generate {
         $kept = Build-UserCfg $userCfgPath $cfg $outCfg
         $cfg | ForEach-Object { Write-Log "  $_" }
         if ($kept) { Write-Log ("Kept {0} line(s) from your existing user.cfg." -f $kept) }
+        if ($fpsLine -eq 'PerfOverlay.DrawFps 0') { Write-Log 'FPS counter: switched off (your existing user.cfg had it on).' }
+        if (-not $classic -and $cbCfgCounter.Checked) { Write-Log 'FPS counter: not confirmed for BF6; if no counter appears, the game ignores it (harmless).' }
         if ($classic -and $cbFps.Checked) {
             Write-Log $(if ($cap -gt 0) { "FPS cap: $cap -> $($capI.Why)" } else { "FPS cap: none (written as 999) -> $($capI.Why)" })
         }

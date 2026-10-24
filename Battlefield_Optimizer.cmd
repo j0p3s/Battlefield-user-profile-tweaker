@@ -40,7 +40,7 @@ exit /b
 #  GUI loads this script's detection and tuning code, so both always agree.
 # =============================================================================
 
-$AppVersion = '2.2.0'
+$AppVersion = '2.2.1'
 
 # Latin-1 maps every byte to one character and back, so files read and
 # written with it keep any non-ASCII byte exactly as it was.
@@ -1045,13 +1045,31 @@ function Get-ProfileSettingsBf6([int]$tier, [int]$threads, [int]$cores, [double]
 
 # -----------------------------------------------------------------------------
 # Get-Bf6ExtraCfg
-# Optional BF6 user.cfg lines. They are opt-in and never part of the default
-# output: no public source confirms that BF6 honours them (the engine ignores
+# Optional BF6 user.cfg line. It is opt-in and never part of the default
+# output: no public source confirms that BF6 honours it (the engine ignores
 # a console command it does not know, so the worst case is no effect).
-# PerfOverlay.DrawFps is the same on-screen FPS counter the older games use.
 # -----------------------------------------------------------------------------
 function Get-Bf6ExtraCfg([int]$threads) {
-    @('PerfOverlay.DrawFps 1', "Thread.MaxWorkerThreadCount $threads")
+    @("Thread.MaxWorkerThreadCount $threads")
+}
+
+# -----------------------------------------------------------------------------
+# Get-FpsCounterCfg
+# The user.cfg line for the in-game FPS counter (PerfOverlay.DrawFps).
+#   $show: 'PerfOverlay.DrawFps 1'.
+#   not $show: nothing is written, unless the current user.cfg turns the counter
+#   on; then 'PerfOverlay.DrawFps 0' replaces that line so the counter really
+#   goes off. Returns $null when no line is needed.
+# Known to work in BF4, BF1 and BF V; not confirmed for BF6, where an unknown
+# command is simply ignored.
+# -----------------------------------------------------------------------------
+function Get-FpsCounterCfg([string]$userCfgPath, [bool]$show) {
+    if ($show) { return 'PerfOverlay.DrawFps 1' }
+    if ($userCfgPath -and (Test-Path -LiteralPath $userCfgPath)) {
+        $on = @([IO.File]::ReadAllLines($userCfgPath, $Latin1) | Where-Object { $_ -match '^\s*PerfOverlay\.DrawFps\s+(?!0\s*$)\S' })
+        if ($on) { return 'PerfOverlay.DrawFps 0' }
+    }
+    $null
 }
 
 # -----------------------------------------------------------------------------
@@ -1279,18 +1297,31 @@ function Invoke-Optimizer($g, [string]$scriptDir) {
         $why = "no VRR, strong desktop: limiter off, FPS above refresh rate lowers input latency"
     }
 
+    # --- Optional user.cfg lines, asked before anything is listed ---
+    Write-Host ''
+    $fc = Read-Host 'Show the FPS counter inside the game? [Y/N] (Enter = Y)'
+    $showFps = -not ($fc -match '^[nN]')
+    $extras = $false
+    if ($id -eq 'bf6' -and $cores -and $threads) {
+        # Off by default: no public source confirms this line for BF6
+        $ex = Read-Host 'Also add the experimental BF6 extra (Thread.MaxWorkerThreadCount)? Unverified. [Y/N] (Enter = N)'
+        $extras = [bool]($ex -match '^[yYsS]')
+    }
+    $fpsLine = Get-FpsCounterCfg $userCfgPath $showFps
+
     # --- user.cfg ---
     $outCfg  = Join-Path $outDir 'user.cfg'
     $haveCfg = $true
     Say ''
     Say '--- user.cfg ---' 'Green'
+    $cfg = @()
+    if ($fpsLine) { $cfg += $fpsLine }                   # on-screen FPS counter
     if ($classic) {
         # Frame cap and render queue. A 1-frame queue gives the lowest input
         # lag; very weak CPUs stutter with it, so they get 2
         $ral = if ($threads -le 4) { 2 } else { 1 }
         $ralWhy = if ($ral -eq 2) { '4 threads or fewer: a 2-frame queue avoids FPS drops' } else { '1-frame queue = lowest input lag' }
-        $cfg = @(
-            'PerfOverlay.DrawFps 1',                 # on-screen FPS counter
+        $cfg += @(
             "GameTime.MaxVariableFps $cap",          # frame rate cap
             "RenderDevice.RenderAheadLimit $ral",    # frames the CPU may queue ahead of the GPU
             'RenderDevice.TripleBufferingEnable 0',
@@ -1306,28 +1337,33 @@ function Invoke-Optimizer($g, [string]$scriptDir) {
         # BF6: CPU thread settings. Widely used community fix for BF6's high
         # CPU usage: tells the engine how many cores (job threads) and logical
         # processors (render threads) to use.
-        $haveCfg = [bool]($cores -and $threads)
-        if ($haveCfg) {
-            $cfg = @(
+        if ($cores -and $threads) {
+            $cfg += @(
                 "Thread.ProcessorCount $cores",
                 "Thread.MaxProcessorCount $cores",
                 'Thread.MinFreeProcessorCount 0',
                 'Thread.JobThreadPriority 0',
                 "GstRender.Thread.MaxProcessorCount $threads"
             )
-            # Optional and off by default: no public source confirms these lines for BF6
-            $ex = Read-Host 'Also add the experimental extras (FPS counter + worker thread count)? Unverified in BF6. [Y/N] (Enter = N)'
-            $extras = [bool]($ex -match '^[yYsS]')
             if ($extras) { $cfg += Get-Bf6ExtraCfg $threads }
+        }
+        $haveCfg = $cfg.Count -gt 0
+        if ($haveCfg) {
             $keptCfg = Build-UserCfg $userCfgPath $cfg $outCfg
             $cfg | ForEach-Object { Say "  $_" }
             if ($keptCfg) { Say ("Kept {0} line(s) from your existing user.cfg." -f $keptCfg) }
-            Say "Threads      : $cores cores / $threads logical processors (update it after a CPU upgrade)"
-            if ($extras) { Say 'Extras       : experimental; if BF6 behaves worse, run this script again and choose Undo.' 'Yellow' }
+            if ($cores -and $threads) { Say "Threads      : $cores cores / $threads logical processors (update it after a CPU upgrade)" }
+            else { Say 'CPU core count could not be read: the thread settings were skipped.' 'Yellow' }
+            if ($extras) { Say 'Extra        : experimental; if BF6 behaves worse, run this script again and choose Undo.' 'Yellow' }
         } else {
             Say 'CPU core count could not be read: no user.cfg was generated.' 'Yellow'
         }
     }
+    if ($showFps) {
+        Say 'FPS counter  : on (PerfOverlay.DrawFps 1)'
+        if ($id -eq 'bf6') { Say '                Not confirmed for BF6: if no counter appears, the game ignores it (harmless).' 'DarkGray' }
+    } elseif ($fpsLine) { Say 'FPS counter  : switched off (your existing user.cfg had it on)' }
+    else { Say 'FPS counter  : off (no line written)' }
 
     # --- PROFSAVE_profile: graphics tier applied on top of the current profile ---
     $outProf = Join-Path $outDir 'PROFSAVE_profile'
