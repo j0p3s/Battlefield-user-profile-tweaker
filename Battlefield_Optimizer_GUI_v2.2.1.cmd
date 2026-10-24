@@ -4,7 +4,7 @@ REM ---------------------------------------------------------------------------
 REM  Battlefield Optimizer GUI - batch/PowerShell hybrid launcher.
 REM  Double-click this file. It starts Windows PowerShell (no console window)
 REM  which reads the rest of this file and shows the window.
-REM  Keep it in the same folder as Battlefield_Optimizer.cmd: the GUI loads
+REM  Keep it in the same folder as Battlefield_Optimizer_v*.cmd: the GUI loads
 REM  that script's detection and tuning functions, so both always agree.
 REM  ExecutionPolicy Bypass applies to this process only.
 REM ---------------------------------------------------------------------------
@@ -70,7 +70,7 @@ foreach ($f in @(Get-ChildItem -LiteralPath $scriptDir -Filter 'Battlefield_Opti
 }
 if ($null -eq $engineText) {
     $dlg = New-Object Windows.Forms.OpenFileDialog
-    $dlg.Title  = 'Select Battlefield_Optimizer.cmd'
+    $dlg.Title  = "Select Battlefield_Optimizer_v$MinEngine.cmd"
     $dlg.Filter = 'Battlefield Optimizer (*.cmd)|*.cmd'
     if ($dlg.ShowDialog() -ne 'OK') { exit }
     $engineText = [IO.File]::ReadAllText($dlg.FileName)
@@ -82,7 +82,7 @@ if ($a -lt 0 -or $b -le $a -or $engineText -notmatch 'function Get-Hardware') {
     throw 'That file is not a compatible Battlefield Optimizer v2 script (engine section not found).'
 }
 if ($engineVer -lt $MinEngine) {
-    throw ("Battlefield_Optimizer.cmd is v{0}, but this GUI (v{1}) needs v{2} or newer.`r`n`r`nDownload the latest script from`r`n{3}/releases/latest`r`nand keep both files in the same folder." -f $engineVer, $GuiVersion, $MinEngine, $RepoUrl)
+    throw ("The Battlefield Optimizer script in this folder is v{0}, but this GUI (v{1}) needs v{2} or newer.`r`n`r`nDownload the latest script from`r`n{3}/releases/latest`r`nand keep both files in the same folder." -f $engineVer, $GuiVersion, $MinEngine, $RepoUrl)
 }
 Invoke-Expression $engineText.Substring($a, $b - $a)
 $AppVersion = $engineVer.ToString()

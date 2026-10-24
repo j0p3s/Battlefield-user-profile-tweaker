@@ -35,7 +35,7 @@ exit /b
 #  and user.cfg contents); only the shared plumbing is common.
 #  Nothing on the system is modified unless you answer "Y" at the end.
 #
-#  Prefer a window with checkboxes? Keep Battlefield_Optimizer_GUI.cmd in the
+#  Prefer a window with checkboxes? Keep Battlefield_Optimizer_GUI_v*.cmd in the
 #  same folder and choose "G" in the menu (or double-click the GUI file). The
 #  GUI loads this script's detection and tuning code, so both always agree.
 # =============================================================================
@@ -1546,6 +1546,26 @@ function Invoke-Optimizer($g, [string]$scriptDir) {
 # =============================================================================
 
 # -----------------------------------------------------------------------------
+# Find-GuiScript
+# Path of the GUI launcher next to this script (Battlefield_Optimizer_GUI*.cmd;
+# the version is part of the file name). If several are there, the one with the
+# highest $GuiVersion wins. Returns $null when there is none.
+# -----------------------------------------------------------------------------
+function Find-GuiScript([string]$dir) {
+    $best = $null
+    $bestVer = [version]'0.0'
+    foreach ($f in @(Get-ChildItem -LiteralPath $dir -Filter 'Battlefield_Optimizer_GUI*.cmd' -File -ErrorAction SilentlyContinue)) {
+        $v = [version]'0.0'
+        try {
+            $m = [regex]::Match([IO.File]::ReadAllText($f.FullName), "GuiVersion = '(\d+(\.\d+){1,3})'")
+            if ($m.Success) { $v = [version]$m.Groups[1].Value }
+        } catch { }
+        if (-not $best -or $v -gt $bestVer) { $best = $f.FullName; $bestVer = $v }
+    }
+    $best
+}
+
+# -----------------------------------------------------------------------------
 # Show-Menu
 # Lists the games with what was found on this PC and returns the choice
 # ('1'-'4', or 'G' to open the graphical interface), or $null to exit.
@@ -1566,8 +1586,8 @@ function Show-Menu([string]$scriptDir) {
         $color = if ($status -eq 'not detected') { 'DarkGray' } else { 'Gray' }
         Write-Host ("  {0}) {1,-15} [{2}]" -f $key, $g.Name, $status) -ForegroundColor $color
     }
-    $guiPath = Join-Path $scriptDir 'Battlefield_Optimizer_GUI.cmd'
-    $hasGui  = Test-Path -LiteralPath $guiPath -PathType Leaf
+    $guiPath = Find-GuiScript $scriptDir
+    $hasGui  = [bool]$guiPath
     if ($hasGui) { Write-Host '  G) Graphical interface (choose every tweak in a window)' }
     Write-Host '  0) Exit'
     Write-Host ''
@@ -1593,7 +1613,7 @@ function Main {
         if (-not $choice) { return }
         if ($choice -eq 'G') {
             # The GUI is a separate launcher in the same folder; it opens its own window
-            Start-Process -FilePath (Join-Path $scriptDir 'Battlefield_Optimizer_GUI.cmd') -WorkingDirectory $scriptDir
+            Start-Process -FilePath (Find-GuiScript $scriptDir) -WorkingDirectory $scriptDir
             return
         }
         try {

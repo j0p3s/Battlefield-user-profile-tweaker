@@ -6,7 +6,7 @@ There are three ways to use it. All are free and open source.
 
 | | 🌐 **Web page** | 💻 **Windows script** | 🖱️ **Windows GUI** |
 |---|---|---|---|
-| Link | **[Open the Config Builder](https://j0p3s.github.io/Battlefield-user-profile-tweaker/)** | [Download `Battlefield_Optimizer.cmd`](../../releases/latest) | [Download `Battlefield_Optimizer_GUI.cmd`](../../releases/latest) (keep it next to the script) |
+| Link | **[Open the Config Builder](https://j0p3s.github.io/Battlefield-user-profile-tweaker/)** | [Download `Battlefield_Optimizer_v2.2.1.cmd`](../../releases/latest) | [Download `Battlefield_Optimizer_GUI_v2.2.1.cmd`](../../releases/latest) (keep it next to the script) |
 | Install or download anything? | **No.** It runs in your browser | One `.cmd` file, no installer | Two `.cmd` files, no installer |
 | Hardware | You pick CPU, GPU, RAM and display from lists | Detected automatically | Detected automatically |
 | You choose | Hardware, game, extras | Game and the G-Sync / FreeSync answer | **Every tweak**, graphics tier, FPS cap, `user.cfg` lines |
@@ -81,9 +81,9 @@ No executables, no DLLs, no game files modified. It's a single, fully commented 
 
 ### Quick start
 
-1. Download **`Battlefield_Optimizer.cmd`** from the [latest release](../../releases/latest). (Also download `Battlefield_Optimizer_GUI.cmd` if you want the [window version](#option-3-windows-gui).)
+1. Download **`Battlefield_Optimizer_v2.2.1.cmd`** from the [latest release](../../releases/latest). (Also download `Battlefield_Optimizer_GUI_v2.2.1.cmd` if you want the [window version](#option-3-windows-gui).) The version is part of the file names; delete older copies if you have them.
 2. Launch the game **once**, reach the main menu, then close it. This creates your `PROFSAVE_profile`.
-3. Double-click `Battlefield_Optimizer.cmd`.
+3. Double-click `Battlefield_Optimizer_v2.2.1.cmd`.
 4. Pick the game from the menu.
 5. Answer the G-Sync / FreeSync question. Press Enter to accept what was detected.
 6. A **`<game>_Optimized` folder** (for example `BF4_Optimized`) appears next to the script, and File Explorer opens it.
@@ -105,7 +105,7 @@ No executables, no DLLs, no game files modified. It's a single, fully commented 
    0) Exit
    ```
 
-   The `G` line only appears when `Battlefield_Optimizer_GUI.cmd` is in the same folder.
+   The `G` line only appears when `Battlefield_Optimizer_GUI_v*.cmd` is in the same folder.
 
 2. **Undo option.** If backups from an earlier run exist, you can choose to **generate** new settings or **undo** the last apply.
 3. **Hardware scan:** CPU, RAM, GPU and VRAM, laptop or desktop, and the EDID of every monitor. This happens once per session.
@@ -155,8 +155,8 @@ Changes:
 Each game gets its own folder next to the script:
 
 ```
-Battlefield_Optimizer.cmd
-Battlefield_Optimizer_GUI.cmd   <- optional
+Battlefield_Optimizer_v2.2.1.cmd
+Battlefield_Optimizer_GUI_v2.2.1.cmd   <- optional
 BF4_Optimized\
 ├── user.cfg            <- goes into the game folder
 ├── PROFSAVE_profile    <- goes into Documents\Battlefield 4\settings
@@ -172,18 +172,18 @@ BF6_Optimized\
 
 ## Option 3: Windows GUI
 
-**`Battlefield_Optimizer_GUI.cmd`** is the same optimizer in a window. Instead of answering prompts, you tick what you want and see the resulting FPS cap and settings before anything is written.
+**`Battlefield_Optimizer_GUI_v2.2.1.cmd`** is the same optimizer in a window. Instead of answering prompts, you tick what you want and see the resulting FPS cap and settings before anything is written.
 
 It needs **no install**: like the script, it is one plain-text `.cmd` file that uses Windows PowerShell 5.1 (WinForms), which comes with Windows. Open it in a text editor to read it first.
 
 ### Quick start
 
-1. Download **both** `Battlefield_Optimizer.cmd` and `Battlefield_Optimizer_GUI.cmd` from the [latest release](../../releases/latest) and keep them in the **same folder**.
+1. Download **both** `Battlefield_Optimizer_v2.2.1.cmd` and `Battlefield_Optimizer_GUI_v2.2.1.cmd` from the [latest release](../../releases/latest) and keep them in the **same folder**.
 2. Launch the game **once**, reach the main menu, then close it. This creates your `PROFSAVE_profile`.
-3. Double-click `Battlefield_Optimizer_GUI.cmd`. (From the script's menu you can also type `G`.)
+3. Double-click `Battlefield_Optimizer_GUI_v2.2.1.cmd`. (From the script's menu you can also type `G`.)
 4. Choose the options below, then click a button.
 
-> The GUI loads the detection and tuning code from `Battlefield_Optimizer.cmd` when it starts, so a fix or a new GPU rule in the script automatically applies to the GUI too. If the script isn't next to it, the GUI asks you to select it. If several copies are in the folder, the one with the highest version is used, and a script older than the GUI is refused with a message telling you what to download.
+> The GUI loads the detection and tuning code from `Battlefield_Optimizer_v2.2.1.cmd` when it starts, so a fix or a new GPU rule in the script automatically applies to the GUI too. If the script isn't next to it, the GUI asks you to select it. If several copies are in the folder, the one with the highest version is used, and a script older than the GUI is refused with a message telling you what to download.
 >
 > Your choices are remembered between runs (in `%APPDATA%\Battlefield Optimizer\gui-settings.json`). **Reset choices** brings back the defaults.
 
@@ -513,16 +513,16 @@ The script asks for the refresh rate of the monitor you play on. On the web page
 | Windows SmartScreen blocks the script | Click **More info > Run anyway**, or right-click > **Properties** > tick **Unblock**. Right-click > **Edit** lets you read the script first. |
 | The window closes immediately | Make sure the file still ends in `.cmd`, not `.cmd.txt`. If you edited it, save it with Windows (CRLF) line endings. |
 | "No ... profile found" / "no PROFSAVE_profile was generated" | Start the game, reach the main menu, close it, then run the script again. |
-| The game shows as "not detected" in the menu | It's installed in an unusual folder. Put `Battlefield_Optimizer.cmd` in the game folder (next to the `.exe`) and run it from there. |
+| The game shows as "not detected" in the menu | It's installed in an unusual folder. Put `Battlefield_Optimizer_v2.2.1.cmd` in the game folder (next to the `.exe`) and run it from there. |
 | Wrong GPU detected on a laptop | Check that the dedicated GPU is enabled in Device Manager and the drivers are installed. Open an issue with your `README.txt`. |
 | "model not recognized" next to the GPU tier | The VRAM fallback was used. Please open an issue with the GPU name shown in `README.txt`. |
 | G-Sync / FreeSync not detected but you have it | Answer **Y**. Some panels, especially laptop screens, don't advertise VRR in their EDID. |
 | Windows shows 60 Hz on a high refresh monitor | Settings > System > Display > Advanced display > pick the highest refresh rate, then run the script again. |
 | "Permission declined" when copying `user.cfg` | Accept the Windows admin prompt, or copy the file by hand from the `<game>_Optimized` folder. |
 | Settings reverted after playing | You probably changed video options in-game. Run the script again. |
-| The GUI says the engine section was not found, says the script is too old, or asks for a file | Keep `Battlefield_Optimizer.cmd` (v2.2.1 or newer, from the same release as the GUI) in the same folder as the GUI, or select it when asked. The file must not be renamed to something that doesn't start with `Battlefield_Optimizer`. |
+| The GUI says the engine section was not found, says the script is too old, or asks for a file | Keep `Battlefield_Optimizer_v2.2.1.cmd` (v2.2.1 or newer, from the same release as the GUI) in the same folder as the GUI, or select it when asked. The file name must start with `Battlefield_Optimizer`; the `_v2.2.1` part can stay. |
 | The GUI doesn't open and nothing happens | Make sure the file still ends in `.cmd`, not `.cmd.txt`, and unblock it as described above. If a message box appears, please include its text in an issue. |
-| The `G` option is missing from the script's menu | `Battlefield_Optimizer_GUI.cmd` must be in the same folder as the script. |
+| The `G` option is missing from the script's menu | `Battlefield_Optimizer_GUI_v*.cmd` must be in the same folder as the script. |
 | The GUI says "There is nothing to apply" | Every option is unticked, or no settings file was found. Tick at least one option and, for BF V / BF6, start the game once first. |
 | Web page: download button for BF V or BF6 is greyed out | Load your current `PROFSAVE_profile` for that game in step 6 first. |
 
@@ -555,15 +555,15 @@ Issues and pull requests are welcome! These are especially useful:
 - GPU tiers are in `Get-GpuTierClassic` and `Get-GpuTierBf6`. Rules are checked top to bottom and the first match wins, so put exceptions above broader patterns.
 - Graphics values are in `Get-ProfileSettingsBf4`, `...Bf1`, `...Bfv` and `...Bf6`.
 
-**Editing the GUI:** `Battlefield_Optimizer_GUI.cmd` extracts everything from the `$Games = [ordered]@{` line down to the `#  OPTIMIZER RUN (one game)` heading of the script, so keep those two markers in place when you edit the script. Anything the GUI calls (for example `Get-DriverAdvice`, `Get-HwWarnings`, `Get-Bf6ExtraCfg`, `Test-GameRunning`) must stay above the second marker. The tweak groups are the `$Cats` table at the top of the GUI; each profile key belongs to the first group whose pattern matches it. When the GUI starts using a new function from the script, raise `$MinEngine` in the GUI so an older script is refused cleanly.
+**Editing the GUI:** `Battlefield_Optimizer_GUI_v*.cmd` extracts everything from the `$Games = [ordered]@{` line down to the `#  OPTIMIZER RUN (one game)` heading of the script, so keep those two markers in place when you edit the script. Anything the GUI calls (for example `Get-DriverAdvice`, `Get-HwWarnings`, `Get-Bf6ExtraCfg`, `Test-GameRunning`) must stay above the second marker. The tweak groups are the `$Cats` table at the top of the GUI; each profile key belongs to the first group whose pattern matches it. When the GUI starts using a new function from the script, raise `$MinEngine` in the GUI so an older script is refused cleanly. For a release, change `$AppVersion` in the script and `$GuiVersion` in the GUI and put the same version in both file names; the script finds the GUI by the pattern `Battlefield_Optimizer_GUI*.cmd` (highest `$GuiVersion` wins) and the GUI finds the script by `Battlefield_Optimizer*.cmd` (highest `$AppVersion` wins).
 
 **Editing the web page:** `index.html` is a single self-contained file. The CPU and GPU lists are at the top of its script.
 
 **Repository layout:**
 
 ```
-Battlefield_Optimizer.cmd       # Windows script and shared engine (batch launcher + PowerShell)
-Battlefield_Optimizer_GUI.cmd   # Windows GUI (uses the script's engine; keep both in one folder)
+Battlefield_Optimizer_v2.2.1.cmd       # Windows script and shared engine (batch launcher + PowerShell)
+Battlefield_Optimizer_GUI_v2.2.1.cmd   # Windows GUI (uses the script's engine; keep both in one folder)
 index.html                      # web page (GitHub Pages)
 README.md                       # this file
 CHANGELOG.md                    # version history

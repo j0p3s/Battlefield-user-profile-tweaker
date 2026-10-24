@@ -10,6 +10,7 @@ All notable changes to this project are listed here, newest first. The format fo
 ### Changed
 - The BF6 experimental extra is now only `Thread.MaxWorkerThreadCount`; the FPS counter moved to the regular option above.
 - Saying no to the FPS counter writes nothing, unless your existing `user.cfg` turns the counter on: then `PerfOverlay.DrawFps 0` replaces that line, so the counter really goes off. (Before, the script always wrote the counter for BF4 / BF1 / BF V, and an unticked GUI box left an old line in place.)
+- **The version is now part of the file names:** `Battlefield_Optimizer_v2.2.1.cmd` and `Battlefield_Optimizer_GUI_v2.2.1.cmd`. The script's `G` menu entry finds the GUI by the pattern `Battlefield_Optimizer_GUI*.cmd`, and the GUI finds the script by `Battlefield_Optimizer*.cmd`; when several copies are in the folder, the highest version wins. Delete older copies when you update.
 - Script and GUI version numbers are now 2.2.1. The GUI needs script 2.2.1 or newer.
 
 ## [2.2.0] - 2026-10-24

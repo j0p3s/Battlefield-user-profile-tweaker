@@ -508,8 +508,8 @@
     <h2 id="winH">On Windows? Two apps, no install</h2>
     <p>Both are single, readable <code>.cmd</code> files that detect your hardware for you, copy the files into the game with a backup, and can undo it. Download them from the <a id="winRelease" href="#">latest release</a>.</p>
     <ul>
-      <li><strong>Battlefield_Optimizer.cmd</strong>: a guided run in the console for all four games. Pick the game, confirm G-Sync / FreeSync, and it does the rest.</li>
-      <li><strong>Battlefield_Optimizer_GUI.cmd</strong>: the same engine in a window. Choose the graphics tier, the FPS cap and every tweak (motion blur, lens effects, depth of field, visibility, V-Sync, frame generation, DirectX 11 and more) with checkboxes, preview the changes, then apply or undo. Keep it in the same folder as the script.</li>
+      <li><strong>Battlefield_Optimizer_v2.2.1.cmd</strong>: a guided run in the console for all four games. Pick the game, confirm G-Sync / FreeSync, and it does the rest.</li>
+      <li><strong>Battlefield_Optimizer_GUI_v2.2.1.cmd</strong>: the same engine in a window. Choose the graphics tier, the FPS cap and every tweak (motion blur, lens effects, depth of field, visibility, V-Sync, frame generation, DirectX 11 and more) with checkboxes, preview the changes, then apply or undo. Keep it in the same folder as the script.</li>
     </ul>
     <p class="hint">The script and the GUI give the same results for the same choices. See the <a id="changelogLink" href="#">changelog</a> for what's new.</p>
   </section>
@@ -531,7 +531,7 @@
 
 // Repository links (change these if you fork the project)
 const REPO_URL   = "https://github.com/j0p3s/Battlefield-user-profile-tweaker";
-// Battlefield_Optimizer.cmd covers all four games
+// Battlefield_Optimizer_v*.cmd covers all four games
 const SCRIPT_URL = REPO_URL + "/releases/latest";
 
 /* ----------------------------------------------------------------------
@@ -540,7 +540,7 @@ const SCRIPT_URL = REPO_URL + "/releases/latest";
      Cores is the total Windows reports (P-cores + E-cores on hybrid Intel).
    GPU entries: [name, VRAM in GB]
      The graphics tier is computed from the name with the same rules as
-     Battlefield_Optimizer.cmd (gpuTierClassic for BF4 / BF1 / BF V,
+     Battlefield_Optimizer_v*.cmd (gpuTierClassic for BF4 / BF1 / BF V,
      bf6Tier for BF6), using the name the graphics driver reports.
    ---------------------------------------------------------------------- */
 const CPUS = [
@@ -589,7 +589,7 @@ const RAM_OPTIONS = [4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128];
 const HZ_OPTIONS  = [60, 75, 90, 100, 120, 144, 165, 170, 175, 180, 200, 240, 280, 360, 480];
 
 /* ----------------------------------------------------------------------
-   GPU tiers: same rules as Battlefield_Optimizer.cmd
+   GPU tiers: same rules as Battlefield_Optimizer_v*.cmd
    The script matches the name Windows reports for the graphics card
    ("NVIDIA GeForce RTX 3080 Laptop GPU", "AMD Radeon RX 6600"...), so the
    short names in the list are first turned into that form.
