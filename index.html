@@ -286,6 +286,23 @@
   .install li, .driver li { margin: 4px 0; }
   .driver { max-width: 72ch; }
 
+  /* ------------------------------------------------------------------
+     What changed in the Windows apps
+     ------------------------------------------------------------------ */
+  .changes .intro { max-width: 72ch; margin: 0 0 18px; }
+  .release { border: 1px solid var(--rule); background: var(--paper); border-radius: var(--radius); padding: 12px 16px; margin: 0 0 12px; }
+  .release summary { cursor: pointer; }
+  .release summary h3 { display: inline; font: 600 26px/1.2 var(--font-cond); margin: 0; }
+  .release .date { font: 500 14px var(--font); color: var(--ink-2); margin-left: 10px; }
+  .release .cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; margin-top: 10px; }
+  @media (max-width: 760px) { .release .cols { grid-template-columns: 1fr; } }
+  .release h4 { font: 600 17px/1.2 var(--font-cond); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); margin: 6px 0 2px; }
+  .release ul { padding-left: 20px; margin: 4px 0 10px; }
+  .release li { margin: 5px 0; font-size: 16px; }
+  .release .both { margin: 4px 0 4px; font-size: 15px; color: var(--ink-2); max-width: 80ch; }
+  .tag { display: inline-block; font: 600 11px/1.5 var(--font); letter-spacing: .05em; text-transform: uppercase; border: 1px solid var(--rule); border-radius: var(--radius); padding: 0 5px; margin-right: 6px; color: var(--ink-2); vertical-align: 1px; }
+  .tag.fix { border-color: var(--marking); color: var(--ink); }
+
   footer { border-top: 1px solid var(--rule); padding: 24px 0 40px; color: var(--ink-2); font-size: 14px; }
   footer p { margin: 6px 0; max-width: 80ch; }
   .theme-toggle { float: right; font-size: 14px; padding: 6px 10px; }
@@ -511,7 +528,84 @@
       <li><strong>Battlefield_Optimizer_v2.2.1.cmd</strong>: a guided run in the console for all four games. Pick the game, confirm G-Sync / FreeSync, and it does the rest.</li>
       <li><strong>Battlefield_Optimizer_GUI_v2.2.1.cmd</strong>: the same engine in a window. Choose the graphics tier, the FPS cap and every tweak (motion blur, lens effects, depth of field, visibility, V-Sync, frame generation, DirectX 11 and more) with checkboxes, preview the changes, then apply or undo. Keep it in the same folder as the script.</li>
     </ul>
-    <p class="hint">The script and the GUI give the same results for the same choices. See the <a id="changelogLink" href="#">changelog</a> for what's new.</p>
+    <p class="hint">The script and the GUI give the same results for the same choices. See <a href="#changes">what changed</a> in each version, or read the <a id="changelogLink" href="#">full changelog</a>.</p>
+  </section>
+
+  <section class="lower changes" id="changes" aria-labelledby="changesH">
+    <h2 id="changesH">What changed in the Windows apps</h2>
+    <p class="intro">The latest versions of the console script and the GUI, newest first. The full list is in the <a id="changelogFull" href="#">changelog on GitHub</a>.</p>
+
+    <details class="release" open>
+      <summary><h3>v2.2.1</h3><time class="date" datetime="2026-10-24">24 Oct 2026</time></summary>
+      <div class="cols">
+        <div>
+          <h4>Script</h4>
+          <ul>
+            <li><span class="tag">New</span>Asks <em>"Show the FPS counter inside the game?"</em> (Enter = yes) for every game, BF6 included. It writes <code>PerfOverlay.DrawFps 1</code>.</li>
+            <li><span class="tag">Changed</span>Saying no writes nothing, unless your current <code>user.cfg</code> turns the counter on: then it is switched off.</li>
+            <li><span class="tag">Changed</span>The BF6 experimental extra is now only <code>Thread.MaxWorkerThreadCount</code> (asked, off by default).</li>
+            <li><span class="tag">Changed</span>The <code>G</code> menu entry finds the GUI by name, so the version can be part of the file name.</li>
+          </ul>
+        </div>
+        <div>
+          <h4>GUI</h4>
+          <ul>
+            <li><span class="tag">New</span>The FPS counter checkbox now also appears for BF6, and is on by default.</li>
+            <li><span class="tag">Changed</span>Unticking the counter switches off one that your current <code>user.cfg</code> turns on, instead of leaving the old line.</li>
+            <li><span class="tag">Changed</span>Finds the script by name; with several copies in the folder, the highest version is used.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="both"><strong>Both:</strong> the version is now part of the file names (<code>Battlefield_Optimizer_v2.2.1.cmd</code> and <code>Battlefield_Optimizer_GUI_v2.2.1.cmd</code>). Delete older copies when you update. The FPS counter line is known to work in BF4, BF1 and BF V; it is not confirmed for BF6, where the game ignores a command it does not know.</p>
+    </details>
+
+    <details class="release">
+      <summary><h3>v2.2.0</h3><time class="date" datetime="2026-10-24">24 Oct 2026</time></summary>
+      <div class="cols">
+        <div>
+          <h4>Script</h4>
+          <ul>
+            <li><span class="tag fix">Fix</span>Asks you to close the game first (type <code>C</code> to continue anyway). The games rewrite their profile when they exit, so a file built while the game was open could overwrite that session's changes.</li>
+            <li><span class="tag fix">Fix</span>On laptops with two GPUs, the dedicated GPU is now preferred over the integrated one.</li>
+            <li><span class="tag">New</span>Optional BF6 experimental extras (asked, off by default).</li>
+            <li><span class="tag">Changed</span>A laptop RTX 5060 gets the Medium tier in BF6, like the 4060 laptop.</li>
+          </ul>
+        </div>
+        <div>
+          <h4>GUI</h4>
+          <ul>
+            <li><span class="tag fix">Fix</span>Waits for the game to close <em>before</em> generating the files, for the same reason.</li>
+            <li><span class="tag fix">Fix</span>With several script copies in the folder, the highest version is used. A script older than the GUI is refused with a clear message.</li>
+            <li><span class="tag fix">Fix</span>"No limit" for BF4, BF1 and BF V writes <code>999</code> instead of <code>0</code>, whose meaning is not documented.</li>
+            <li><span class="tag">New</span>Remembers your choices between runs, plus a <strong>Reset choices</strong> button.</li>
+            <li><span class="tag">New</span>Each tweak group shows how many settings it holds (hover for the list); groups the game does not have are greyed out.</li>
+            <li><span class="tag">New</span>The report includes the warnings, hints and driver advice the script shows, and Undo shows the date of each backup.</li>
+            <li><span class="tag">New</span>BF6 experimental extras checkbox, and a link to the project page.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="both"><strong>Both:</strong> driver advice, hardware warnings and the BF6 extras now live in the script and are shared with the GUI, so both say the same thing.</p>
+    </details>
+
+    <details class="release">
+      <summary><h3>v2.1.0</h3><time class="date" datetime="2026-10-23">23 Oct 2026</time></summary>
+      <div class="cols">
+        <div>
+          <h4>Script</h4>
+          <ul>
+            <li><span class="tag">New</span>A <code>G) Graphical interface</code> menu entry opens the GUI when it is in the same folder.</li>
+            <li><span class="tag">Changed</span>The detection and tuning code is shared with the GUI, so both give the same results. Generation, backups and Undo are unchanged.</li>
+          </ul>
+        </div>
+        <div>
+          <h4>GUI</h4>
+          <ul>
+            <li><span class="tag">New</span>First release: choose the game, the graphics tier (Auto, Low, Medium or High), each tweak group, the FPS cap (Auto, custom value or no limit) and the <code>user.cfg</code> lines.</li>
+            <li><span class="tag">New</span>Buttons: Generate files (preview only), Generate and apply (with backup), Undo last apply and Open output folder. It uses the same backups as the script.</li>
+          </ul>
+        </div>
+      </div>
+    </details>
   </section>
 
   <footer>
@@ -1452,6 +1546,7 @@ $("scriptLink").href = SCRIPT_URL;
 $("guiLink").href = SCRIPT_URL;
 $("winRelease").href = SCRIPT_URL;
 $("changelogLink").href = REPO_URL + "/blob/main/CHANGELOG.md";
+$("changelogFull").href = REPO_URL + "/blob/main/CHANGELOG.md";
 
 // Picking a laptop CPU or GPU switches PC type to Laptop (still editable)
 $("cpu").addEventListener("change", () => {
